@@ -3,25 +3,105 @@
 @tailwind utilities;
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* TRS Brand */
+  --trs-gold: #F5A623;
+  --trs-gold-dark: #D4891A;
+  --trs-black: #0F0F0F;
+  --trs-charcoal: #1C1C1E;
+  --trs-slate: #2C2C2E;
+
+  /* Status Colors — colorblind safe */
+  --status-idle: #34C759;
+  --status-enroute: #FF9F0A;
+  --status-onjob: #007AFF;
+  --status-complete: #30D158;
+  --status-urgent: #FF3B30;
+
+  /* Text */
+  --text-primary: #FFFFFF;
+  --text-secondary: #8E8E93;
+  --text-tertiary: #48484A;
+
+  /* Backgrounds */
+  --bg-primary: #000000;
+  --bg-elevated: #1C1C1E;
+  --bg-card: #2C2C2E;
+
+  /* Typography scale */
+  --text-xs: 11px;
+  --text-sm: 13px;
+  --text-base: 15px;
+  --text-lg: 17px;
+  --text-xl: 20px;
+  --text-2xl: 24px;
+  --text-3xl: 32px;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+/* Always dark — no light mode */
+html {
+  color-scheme: dark;
+}
+
+* {
+  box-sizing: border-box;
 }
 
 body {
-  color: var(--foreground);
-  background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-dm-sans), system-ui, sans-serif;
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Minimum tap target enforcement */
+button,
+[role="button"],
+input,
+select,
+textarea {
+  min-height: 44px;
+}
+
+a {
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+}
+
+/* Focus visible — keyboard nav */
+:focus-visible {
+  outline: 2px solid var(--trs-gold);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* Remove default focus for mouse users */
+:focus:not(:focus-visible) {
+  outline: none;
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
+}
+::-webkit-scrollbar-track {
+  background: var(--bg-elevated);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--text-tertiary);
+  border-radius: 2px;
 }
 
 @layer utilities {
   .text-balance {
     text-wrap: balance;
+  }
+  .font-display {
+    font-family: var(--font-syne), sans-serif;
+  }
+  .font-mono {
+    font-family: var(--font-jetbrains-mono), monospace;
   }
 }
