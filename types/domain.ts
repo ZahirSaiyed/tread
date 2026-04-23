@@ -4,6 +4,8 @@ import type {
   JobStatus,
   ServiceType,
   ServiceVariant,
+  VehicleClass,
+  LocationType,
   JobSource,
   MessageDirection,
   PhotoType,
@@ -95,8 +97,12 @@ export interface PricingRule {
   id: string
   tenant_id: string
   service_type: ServiceType
-  service_variant: ServiceVariant | null
-  price_cents: number
+  vehicle_class: VehicleClass
+  location_type: LocationType
+  base_price_cents: number
+  mobile_fee_cents: number
+  disposal_fee_cents: number
+  tax_rate: number          // e.g. 0.0600 for 6%
   is_active: boolean
   created_at: string
 }

@@ -220,8 +220,12 @@ export type Database = {
           id: string
           tenant_id: string
           service_type: string
-          service_variant: string | null
-          price_cents: number
+          vehicle_class: string
+          location_type: string
+          base_price_cents: number
+          mobile_fee_cents: number
+          disposal_fee_cents: number
+          tax_rate: number
           is_active: boolean
           created_at: string
         }
@@ -229,8 +233,12 @@ export type Database = {
           id?: string
           tenant_id: string
           service_type: string
-          service_variant?: string | null
-          price_cents: number
+          vehicle_class?: string
+          location_type?: string
+          base_price_cents: number
+          mobile_fee_cents?: number
+          disposal_fee_cents?: number
+          tax_rate?: number
           is_active?: boolean
           created_at?: string
         }
@@ -238,8 +246,12 @@ export type Database = {
           id?: string
           tenant_id?: string
           service_type?: string
-          service_variant?: string | null
-          price_cents?: number
+          vehicle_class?: string
+          location_type?: string
+          base_price_cents?: number
+          mobile_fee_cents?: number
+          disposal_fee_cents?: number
+          tax_rate?: number
           is_active?: boolean
           created_at?: string
         }

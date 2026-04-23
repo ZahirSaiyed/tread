@@ -33,6 +33,10 @@ export type WheelRepairVariant = 'oem_crack' | 'aftermarket' | 'aluminum_bent' |
 
 export type ServiceVariant = MountBalanceVariant | TireRepairVariant | WheelRepairVariant
 
+export type VehicleClass = 'standard' | 'suv' | 'truck' | 'lt' | 'specialty'
+
+export type LocationType = 'suburban' | 'highway'
+
 export type JobSource = 'sms' | 'web' | 'manual'
 
 export type MessageDirection = 'inbound' | 'outbound'
@@ -71,4 +75,17 @@ export const JOB_STATUS_LABELS: Record<JobStatus, string> = {
   on_site: 'On Site',
   complete: 'Complete',
   cancelled: 'Cancelled',
+}
+
+export const VEHICLE_CLASS_LABELS: Record<VehicleClass, string> = {
+  standard:  'Standard (sedan/coupe)',
+  suv:       'SUV / Crossover',
+  truck:     'Pickup Truck / Full-Size SUV',
+  lt:        'Light Truck / Heavy Duty',
+  specialty: 'Specialty (low-profile / run-flat / performance)',
+}
+
+export const LOCATION_TYPE_LABELS: Record<LocationType, string> = {
+  suburban: 'Suburban',
+  highway:  'Highway / Interstate',
 }
