@@ -5,7 +5,6 @@ import { z } from 'zod'
 import { createClient } from '@/lib/supabase/server'
 import { getAuthUser } from '@/lib/auth/session'
 import { upsertPricingRule } from '@/lib/db/pricing'
-import type { ServiceType } from '@/types/enums'
 
 const SERVICE_TYPES = [
   'mount_balance','tire_repair','wheel_repair','jumpstart','spare_installation',

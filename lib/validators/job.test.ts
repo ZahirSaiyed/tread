@@ -48,7 +48,8 @@ describe('CreateJobSchema', () => {
   })
 
   it('defaults source to manual when omitted', () => {
-    const { source: _, ...withoutSource } = valid
+    const { source, ...withoutSource } = valid
+    void source
     const r = CreateJobSchema.safeParse(withoutSource)
     expect(r.success).toBe(true)
     if (r.success) expect(r.data.source).toBe('manual')

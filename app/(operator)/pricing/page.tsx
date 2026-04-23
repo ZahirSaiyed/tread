@@ -2,13 +2,8 @@ import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { getAuthUser } from '@/lib/auth/session'
 import { listPricingRules } from '@/lib/db/pricing'
-import { formatCents } from '@/lib/pricing/quote'
-import {
-  SERVICE_TYPE_LABELS,
-  VEHICLE_CLASS_LABELS,
-  LOCATION_TYPE_LABELS,
-} from '@/types/enums'
-import type { ServiceType, VehicleClass, LocationType } from '@/types/enums'
+import { SERVICE_TYPE_LABELS } from '@/types/enums'
+import type { ServiceType } from '@/types/enums'
 import type { PricingRule } from '@/types/domain'
 import { PricingRuleRow } from './PricingRuleRow'
 

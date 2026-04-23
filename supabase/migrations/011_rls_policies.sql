@@ -1,5 +1,7 @@
 -- Migration 011: Row Level Security Policies
 -- Covers all tables from SM 1.1 (tenants, users) and SM 1.2 (jobs through sops).
+-- DROP POLICY IF EXISTS before each CREATE keeps this migration safe when the remote
+-- DB already had policies from a prior partial setup or manual SQL.
 
 -- ============================================================
 -- ENABLE RLS
@@ -45,12 +47,12 @@ $$;
 -- TENANTS
 -- ============================================================
 
--- Operators and techs see only their own tenant
+DROP POLICY IF EXISTS "tenants_select_own" ON tenants;
 CREATE POLICY "tenants_select_own"
   ON tenants FOR SELECT
   USING (id = get_user_tenant_id());
 
--- Only operators can update their tenant record
+DROP POLICY IF EXISTS "tenants_update_operator" ON tenants;
 CREATE POLICY "tenants_update_operator"
   ON tenants FOR UPDATE
   USING (
@@ -65,12 +67,12 @@ CREATE POLICY "tenants_update_operator"
 -- USERS
 -- ============================================================
 
--- All users in same tenant can see each other (for tech assignment lists etc.)
+DROP POLICY IF EXISTS "users_select_same_tenant" ON users;
 CREATE POLICY "users_select_same_tenant"
   ON users FOR SELECT
   USING (tenant_id = get_user_tenant_id());
 
--- Only operators (and admins) can add new users to their tenant
+DROP POLICY IF EXISTS "users_insert_operator" ON users;
 CREATE POLICY "users_insert_operator"
   ON users FOR INSERT
   WITH CHECK (
@@ -78,7 +80,7 @@ CREATE POLICY "users_insert_operator"
     AND get_user_role() IN ('operator', 'admin')
   );
 
--- Operators can update users in their tenant; users can update themselves
+DROP POLICY IF EXISTS "users_update_operator_or_self" ON users;
 CREATE POLICY "users_update_operator_or_self"
   ON users FOR UPDATE
   USING (
@@ -95,7 +97,7 @@ CREATE POLICY "users_update_operator_or_self"
 -- JOBS
 -- ============================================================
 
--- Operators see all jobs in their tenant; techs see only their assigned jobs
+DROP POLICY IF EXISTS "jobs_select" ON jobs;
 CREATE POLICY "jobs_select"
   ON jobs FOR SELECT
   USING (
@@ -106,7 +108,7 @@ CREATE POLICY "jobs_select"
     )
   );
 
--- Operators create jobs; service role creates jobs from SMS/web sources
+DROP POLICY IF EXISTS "jobs_insert_operator" ON jobs;
 CREATE POLICY "jobs_insert_operator"
   ON jobs FOR INSERT
   WITH CHECK (
@@ -114,7 +116,7 @@ CREATE POLICY "jobs_insert_operator"
     AND get_user_role() IN ('operator', 'admin')
   );
 
--- Operators update any job in their tenant; techs update status on their own jobs
+DROP POLICY IF EXISTS "jobs_update_operator" ON jobs;
 CREATE POLICY "jobs_update_operator"
   ON jobs FOR UPDATE
   USING (
@@ -122,6 +124,7 @@ CREATE POLICY "jobs_update_operator"
     AND get_user_role() IN ('operator', 'admin')
   );
 
+DROP POLICY IF EXISTS "jobs_update_assigned_tech" ON jobs;
 CREATE POLICY "jobs_update_assigned_tech"
   ON jobs FOR UPDATE
   USING (
@@ -136,12 +139,12 @@ CREATE POLICY "jobs_update_assigned_tech"
 -- JOB EVENTS
 -- ============================================================
 
--- All tenant members can see events (operators need full audit trail)
+DROP POLICY IF EXISTS "job_events_select" ON job_events;
 CREATE POLICY "job_events_select"
   ON job_events FOR SELECT
   USING (tenant_id = get_user_tenant_id());
 
--- Any authenticated tenant member can append events (status changes, notes, etc.)
+DROP POLICY IF EXISTS "job_events_insert" ON job_events;
 CREATE POLICY "job_events_insert"
   ON job_events FOR INSERT
   WITH CHECK (tenant_id = get_user_tenant_id());
@@ -152,12 +155,12 @@ CREATE POLICY "job_events_insert"
 -- JOB PHOTOS
 -- ============================================================
 
--- All tenant members can view photos
+DROP POLICY IF EXISTS "job_photos_select" ON job_photos;
 CREATE POLICY "job_photos_select"
   ON job_photos FOR SELECT
   USING (tenant_id = get_user_tenant_id());
 
--- Operators can upload any photo; techs can only upload to their assigned jobs
+DROP POLICY IF EXISTS "job_photos_insert_operator" ON job_photos;
 CREATE POLICY "job_photos_insert_operator"
   ON job_photos FOR INSERT
   WITH CHECK (
@@ -165,6 +168,7 @@ CREATE POLICY "job_photos_insert_operator"
     AND get_user_role() IN ('operator', 'admin')
   );
 
+DROP POLICY IF EXISTS "job_photos_insert_assigned_tech" ON job_photos;
 CREATE POLICY "job_photos_insert_assigned_tech"
   ON job_photos FOR INSERT
   WITH CHECK (
@@ -181,12 +185,12 @@ CREATE POLICY "job_photos_insert_assigned_tech"
 -- PRICING RULES
 -- ============================================================
 
--- All tenant members can read pricing (techs need it for quoting)
+DROP POLICY IF EXISTS "pricing_rules_select" ON pricing_rules;
 CREATE POLICY "pricing_rules_select"
   ON pricing_rules FOR SELECT
   USING (tenant_id = get_user_tenant_id());
 
--- Only operators manage pricing
+DROP POLICY IF EXISTS "pricing_rules_insert_operator" ON pricing_rules;
 CREATE POLICY "pricing_rules_insert_operator"
   ON pricing_rules FOR INSERT
   WITH CHECK (
@@ -194,6 +198,7 @@ CREATE POLICY "pricing_rules_insert_operator"
     AND get_user_role() IN ('operator', 'admin')
   );
 
+DROP POLICY IF EXISTS "pricing_rules_update_operator" ON pricing_rules;
 CREATE POLICY "pricing_rules_update_operator"
   ON pricing_rules FOR UPDATE
   USING (
@@ -205,10 +210,12 @@ CREATE POLICY "pricing_rules_update_operator"
 -- LOCATION FEES
 -- ============================================================
 
+DROP POLICY IF EXISTS "location_fees_select" ON location_fees;
 CREATE POLICY "location_fees_select"
   ON location_fees FOR SELECT
   USING (tenant_id = get_user_tenant_id());
 
+DROP POLICY IF EXISTS "location_fees_insert_operator" ON location_fees;
 CREATE POLICY "location_fees_insert_operator"
   ON location_fees FOR INSERT
   WITH CHECK (
@@ -216,6 +223,7 @@ CREATE POLICY "location_fees_insert_operator"
     AND get_user_role() IN ('operator', 'admin')
   );
 
+DROP POLICY IF EXISTS "location_fees_update_operator" ON location_fees;
 CREATE POLICY "location_fees_update_operator"
   ON location_fees FOR UPDATE
   USING (
@@ -227,7 +235,7 @@ CREATE POLICY "location_fees_update_operator"
 -- MESSAGES
 -- ============================================================
 
--- Operators see all messages; techs see messages linked to their jobs
+DROP POLICY IF EXISTS "messages_select_operator" ON messages;
 CREATE POLICY "messages_select_operator"
   ON messages FOR SELECT
   USING (
@@ -235,6 +243,7 @@ CREATE POLICY "messages_select_operator"
     AND get_user_role() IN ('operator', 'admin')
   );
 
+DROP POLICY IF EXISTS "messages_select_tech" ON messages;
 CREATE POLICY "messages_select_tech"
   ON messages FOR SELECT
   USING (
@@ -254,7 +263,7 @@ CREATE POLICY "messages_select_tech"
 -- REVIEW REQUESTS
 -- ============================================================
 
--- Operators see all review requests in their tenant
+DROP POLICY IF EXISTS "review_requests_select" ON review_requests;
 CREATE POLICY "review_requests_select"
   ON review_requests FOR SELECT
   USING (
@@ -268,7 +277,7 @@ CREATE POLICY "review_requests_select"
 -- NOTIFICATIONS
 -- ============================================================
 
--- Users see only their own notifications
+DROP POLICY IF EXISTS "notifications_select_own" ON notifications;
 CREATE POLICY "notifications_select_own"
   ON notifications FOR SELECT
   USING (
@@ -276,7 +285,7 @@ CREATE POLICY "notifications_select_own"
     AND user_id = auth.uid()
   );
 
--- Users can mark their own notifications as read
+DROP POLICY IF EXISTS "notifications_update_own" ON notifications;
 CREATE POLICY "notifications_update_own"
   ON notifications FOR UPDATE
   USING (
@@ -290,7 +299,7 @@ CREATE POLICY "notifications_update_own"
 -- SOP DOCUMENTS
 -- ============================================================
 
--- Published SOPs visible to all tenant members; drafts only to operators
+DROP POLICY IF EXISTS "sop_documents_select" ON sop_documents;
 CREATE POLICY "sop_documents_select"
   ON sop_documents FOR SELECT
   USING (
@@ -301,7 +310,7 @@ CREATE POLICY "sop_documents_select"
     )
   );
 
--- Only operators author SOPs
+DROP POLICY IF EXISTS "sop_documents_insert_operator" ON sop_documents;
 CREATE POLICY "sop_documents_insert_operator"
   ON sop_documents FOR INSERT
   WITH CHECK (
@@ -309,6 +318,7 @@ CREATE POLICY "sop_documents_insert_operator"
     AND get_user_role() IN ('operator', 'admin')
   );
 
+DROP POLICY IF EXISTS "sop_documents_update_operator" ON sop_documents;
 CREATE POLICY "sop_documents_update_operator"
   ON sop_documents FOR UPDATE
   USING (
