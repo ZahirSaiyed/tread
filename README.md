@@ -1,5 +1,16 @@
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
+## Product milestones (TRS PRD)
+
+Submilestones marked **done** in this repo as of the latest `main`:
+
+- [x] **SM 2.1** — Tech dashboard (`/jobs`): metrics, filters, search, pull-to-refresh, realtime, job cards.
+- [x] **SM 2.2** — Job detail (`/jobs/[id]`): full context, one-tap status flow, maps/call, cancel, `job_events` with `from`/`to`.
+- [x] **SM 2.3** — Photo gate: private `job-photos` storage, three required types before **Complete**, signed URLs on job GET.
+- [x] **SM 2.4** — Training & SOPs (`/training`): mobile list + detail, search, static tech-facing procedures (operator authoring / DB-backed SOPs deferred).
+
+Ops: after schema changes run `npx supabase db push`. Local demo jobs: `POST /api/dev/seed-jobs` (development only) or the **Load demo jobs** control on an empty `/jobs` screen.
+
 ## Getting Started
 
 First, run the development server:
