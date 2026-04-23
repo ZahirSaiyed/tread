@@ -2,8 +2,8 @@
 // Run `npm run db:types` after connecting to your Supabase project to regenerate.
 // DO NOT edit manually.
 
-// Placeholder until Supabase project is connected.
-// All queries should use the domain types in domain.ts for now.
+// Hand-maintained stub until Supabase project is connected.
+// All queries should also use the domain types in domain.ts for business logic.
 
 export type Database = {
   public: {
@@ -88,6 +88,326 @@ export type Database = {
           avatar_url?: string | null
           is_active?: boolean
           created_at?: string
+        }
+      }
+      jobs: {
+        Row: {
+          id: string
+          tenant_id: string
+          customer_name: string
+          customer_phone: string
+          address: string
+          lat: number | null
+          lng: number | null
+          vehicle_year: number | null
+          vehicle_make: string | null
+          vehicle_model: string | null
+          service_type: string
+          service_variant: string | null
+          status: string
+          assigned_tech_id: string | null
+          price_cents: number | null
+          notes: string | null
+          source: string
+          tracking_token: string
+          tracking_expires_at: string | null
+          created_at: string
+          assigned_at: string | null
+          started_at: string | null
+          completed_at: string | null
+          cancelled_at: string | null
+          cancellation_reason: string | null
+        }
+        Insert: {
+          id?: string
+          tenant_id: string
+          customer_name: string
+          customer_phone: string
+          address: string
+          lat?: number | null
+          lng?: number | null
+          vehicle_year?: number | null
+          vehicle_make?: string | null
+          vehicle_model?: string | null
+          service_type: string
+          service_variant?: string | null
+          status?: string
+          assigned_tech_id?: string | null
+          price_cents?: number | null
+          notes?: string | null
+          source?: string
+          tracking_token?: string
+          tracking_expires_at?: string | null
+          created_at?: string
+          assigned_at?: string | null
+          started_at?: string | null
+          completed_at?: string | null
+          cancelled_at?: string | null
+          cancellation_reason?: string | null
+        }
+        Update: {
+          id?: string
+          tenant_id?: string
+          customer_name?: string
+          customer_phone?: string
+          address?: string
+          lat?: number | null
+          lng?: number | null
+          vehicle_year?: number | null
+          vehicle_make?: string | null
+          vehicle_model?: string | null
+          service_type?: string
+          service_variant?: string | null
+          status?: string
+          assigned_tech_id?: string | null
+          price_cents?: number | null
+          notes?: string | null
+          source?: string
+          tracking_token?: string
+          tracking_expires_at?: string | null
+          created_at?: string
+          assigned_at?: string | null
+          started_at?: string | null
+          completed_at?: string | null
+          cancelled_at?: string | null
+          cancellation_reason?: string | null
+        }
+      }
+      job_events: {
+        Row: {
+          id: string
+          job_id: string
+          tenant_id: string
+          event_type: string
+          payload: Record<string, unknown>
+          created_by: string | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          job_id: string
+          tenant_id: string
+          event_type: string
+          payload?: Record<string, unknown>
+          created_by?: string | null
+          created_at?: string
+        }
+        Update: never
+      }
+      job_photos: {
+        Row: {
+          id: string
+          job_id: string
+          tenant_id: string
+          photo_type: string
+          storage_url: string
+          uploaded_by: string
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          job_id: string
+          tenant_id: string
+          photo_type: string
+          storage_url: string
+          uploaded_by: string
+          created_at?: string
+        }
+        Update: never
+      }
+      pricing_rules: {
+        Row: {
+          id: string
+          tenant_id: string
+          service_type: string
+          service_variant: string | null
+          price_cents: number
+          is_active: boolean
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          tenant_id: string
+          service_type: string
+          service_variant?: string | null
+          price_cents: number
+          is_active?: boolean
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          tenant_id?: string
+          service_type?: string
+          service_variant?: string | null
+          price_cents?: number
+          is_active?: boolean
+          created_at?: string
+        }
+      }
+      location_fees: {
+        Row: {
+          id: string
+          tenant_id: string
+          city: string
+          state_code: string
+          country_code: string
+          fee_cents: number
+          fee_tier: number
+          is_active: boolean
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          tenant_id: string
+          city: string
+          state_code: string
+          country_code?: string
+          fee_cents: number
+          fee_tier: number
+          is_active?: boolean
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          tenant_id?: string
+          city?: string
+          state_code?: string
+          country_code?: string
+          fee_cents?: number
+          fee_tier?: number
+          is_active?: boolean
+          created_at?: string
+        }
+      }
+      messages: {
+        Row: {
+          id: string
+          tenant_id: string
+          job_id: string | null
+          direction: string
+          from_number: string
+          to_number: string
+          body: string
+          status: string
+          twilio_sid: string | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          tenant_id: string
+          job_id?: string | null
+          direction: string
+          from_number: string
+          to_number: string
+          body: string
+          status?: string
+          twilio_sid?: string | null
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          tenant_id?: string
+          job_id?: string | null
+          direction?: string
+          from_number?: string
+          to_number?: string
+          body?: string
+          status?: string
+          twilio_sid?: string | null
+          created_at?: string
+        }
+      }
+      review_requests: {
+        Row: {
+          id: string
+          tenant_id: string
+          job_id: string
+          customer_phone: string
+          sent_at: string
+          clicked_at: string | null
+          review_url: string
+          twilio_sid: string | null
+        }
+        Insert: {
+          id?: string
+          tenant_id: string
+          job_id: string
+          customer_phone: string
+          sent_at?: string
+          clicked_at?: string | null
+          review_url: string
+          twilio_sid?: string | null
+        }
+        Update: {
+          id?: string
+          tenant_id?: string
+          job_id?: string
+          customer_phone?: string
+          sent_at?: string
+          clicked_at?: string | null
+          review_url?: string
+          twilio_sid?: string | null
+        }
+      }
+      notifications: {
+        Row: {
+          id: string
+          tenant_id: string
+          user_id: string
+          type: string
+          payload: Record<string, unknown>
+          read_at: string | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          tenant_id: string
+          user_id: string
+          type: string
+          payload?: Record<string, unknown>
+          read_at?: string | null
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          tenant_id?: string
+          user_id?: string
+          type?: string
+          payload?: Record<string, unknown>
+          read_at?: string | null
+          created_at?: string
+        }
+      }
+      sop_documents: {
+        Row: {
+          id: string
+          tenant_id: string
+          title: string
+          category: string
+          content_markdown: string
+          is_published: boolean
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          tenant_id: string
+          title: string
+          category: string
+          content_markdown?: string
+          is_published?: boolean
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          tenant_id?: string
+          title?: string
+          category?: string
+          content_markdown?: string
+          is_published?: boolean
+          created_at?: string
+          updated_at?: string
         }
       }
     }
