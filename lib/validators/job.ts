@@ -1,4 +1,5 @@
 import { z } from 'zod'
+import type { JobStatus } from '@/types/enums'
 
 const phoneE164 = z
   .string()
@@ -40,8 +41,8 @@ export const CreateJobSchema = z.object({
 
 export type CreateJobInput = z.infer<typeof CreateJobSchema>
 
-// Status transitions allowed from each state
-const STATUS_TRANSITIONS: Record<string, string[]> = {
+// Allowed status transitions (from → allowed tos)
+const STATUS_TRANSITIONS: Record<JobStatus, JobStatus[]> = {
   pending:   ['assigned', 'cancelled'],
   assigned:  ['en_route', 'cancelled'],
   en_route:  ['on_site', 'cancelled'],
@@ -50,20 +51,17 @@ const STATUS_TRANSITIONS: Record<string, string[]> = {
   cancelled: [],
 }
 
+export function isValidTransition(from: JobStatus, to: JobStatus): boolean {
+  return STATUS_TRANSITIONS[from]?.includes(to) ?? false
+}
+
+// Request body for PATCH /api/jobs/[id]/status
+// current_status is NOT accepted from client — the route reads it from the DB.
 export const UpdateJobStatusSchema = z
   .object({
     status: z.enum(['pending', 'assigned', 'en_route', 'on_site', 'complete', 'cancelled']),
-    current_status: z.enum(['pending', 'assigned', 'en_route', 'on_site', 'complete', 'cancelled']),
-    cancellation_reason: z.string().max(500).optional(),
+    cancellation_reason: z.string().min(1).max(500).optional(),
   })
-  .refine(
-    ({ status, current_status }) =>
-      STATUS_TRANSITIONS[current_status]?.includes(status) ?? false,
-    ({ status, current_status }) => ({
-      message: `Cannot transition from "${current_status}" to "${status}"`,
-      path: ['status'],
-    }),
-  )
   .refine(
     ({ status, cancellation_reason }) =>
       status !== 'cancelled' || !!cancellation_reason,
