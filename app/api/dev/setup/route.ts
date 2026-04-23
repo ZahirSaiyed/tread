@@ -2,9 +2,6 @@ import { NextResponse, type NextRequest } from 'next/server'
 import { createServiceClient } from '@/lib/supabase/server'
 import type { Role } from '@/types/enums'
 
-// DEV ONLY — idempotent user + profile setup. Called by DevLoginPanel.
-// Avoids listUsers() (slow). Uses try-create → public.users fallback instead.
-
 const DEV_PASSWORD = 'trs-dev-local-2024'
 const TRS_TENANT_ID = 'a1b2c3d4-0000-0000-0000-000000000001'
 
@@ -25,7 +22,7 @@ export async function POST(request: NextRequest) {
 
   let userId: string
 
-  // Fast path: try to create — succeeds on first call, fails on subsequent
+  // Try to create — fast path on first call
   const { data: created, error: createError } = await admin.auth.admin.createUser({
     email,
     password: DEV_PASSWORD,
@@ -35,24 +32,50 @@ export async function POST(request: NextRequest) {
   if (!createError) {
     userId = created.user.id
   } else {
-    // User already exists — find their ID from public.users (written on first setup)
+    // User already exists in auth. Try public.users first (fast after first setup).
     const { data: profile } = await admin
       .from('users')
       .select('id')
       .eq('email', email)
-      .single()
+      .maybeSingle()               // returns null on 0 rows, no error
 
-    if (!profile) {
-      return NextResponse.json({ error: 'User exists in auth but has no profile row' }, { status: 500 })
+    if (profile) {
+      userId = profile.id
+    } else {
+      // Orphaned auth user (e.g. from failed previous attempt) — one-time listUsers fallback
+      const { data: { users } } = await admin.auth.admin.listUsers()
+      const existing = users.find(u => u.email === email)
+      if (!existing) {
+        return NextResponse.json({ error: `Auth user ${email} not found` }, { status: 500 })
+      }
+      userId = existing.id
+      // Ensure password is set correctly
+      await admin.auth.admin.updateUserById(userId, { password: DEV_PASSWORD })
     }
-    userId = profile.id
   }
 
-  // Upsert profile (no-op on repeat calls)
-  await admin.from('users').upsert(
+  // Upsert profile — also seeds the tenant row if it's missing
+  const { error: tenantCheck } = await admin
+    .from('tenants')
+    .select('id')
+    .eq('id', TRS_TENANT_ID)
+    .single()
+
+  if (tenantCheck) {
+    return NextResponse.json({
+      error: 'TRS tenant row missing — run the seed SQL first',
+      hint: `INSERT INTO tenants (id, name, slug, primary_color, plan_tier, after_hours_fee_cents, after_hours_start, after_hours_end, highway_minimum_fee_cents) VALUES ('${TRS_TENANT_ID}', 'TRS Mobile Tire Shop', 'trs', '#F5A623', 'starter', 7500, '22:00', '08:00', 17500) ON CONFLICT (id) DO NOTHING;`,
+    }, { status: 500 })
+  }
+
+  const { error: upsertError } = await admin.from('users').upsert(
     { id: userId, tenant_id: TRS_TENANT_ID, role, name, email, is_active: true },
     { onConflict: 'id' },
   )
+
+  if (upsertError) {
+    return NextResponse.json({ error: upsertError.message, code: upsertError.code }, { status: 500 })
+  }
 
   return NextResponse.json({ email, password: DEV_PASSWORD })
 }

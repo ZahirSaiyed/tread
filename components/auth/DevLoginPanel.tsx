@@ -27,13 +27,15 @@ export function DevLoginPanel() {
       body: JSON.stringify({ role }),
     })
 
+    const setupJson = await setup.json()
+
     if (!setup.ok) {
-      setError('Setup failed — check console')
+      setError(setupJson.hint ?? setupJson.detail ?? setupJson.error ?? 'Setup failed')
       setLoading(null)
       return
     }
 
-    const { email, password } = await setup.json()
+    const { email, password } = setupJson
 
     // 2. Sign in client-side — browser sets session cookies automatically
     const supabase = createClient()
