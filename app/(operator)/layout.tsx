@@ -1,4 +1,5 @@
 import { AppShellHeader } from '@/components/branding/AppShellHeader'
+import { OperatorBottomNav } from '@/components/operator/OperatorBottomNav'
 
 export default async function OperatorLayout({
   children,
@@ -6,9 +7,12 @@ export default async function OperatorLayout({
   children: React.ReactNode
 }) {
   return (
-    <div className="min-h-screen bg-[#000000]">
+    <div className="flex h-dvh min-h-0 flex-col overflow-hidden bg-[#000000]">
       <AppShellHeader variant="operator" />
-      {children}
+      <div className="flex min-h-0 flex-1 flex-col overflow-y-auto overflow-x-hidden [-webkit-overflow-scrolling:touch]">
+        {children}
+      </div>
+      <OperatorBottomNav />
     </div>
   )
 }

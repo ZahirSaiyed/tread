@@ -3,7 +3,7 @@ import type { AuthUser } from '@/types/domain'
 
 export const OPERATOR_ROUTES = [
   '/dashboard',
-  '/jobs',
+  '/dashboard/jobs',
   '/pricing',
   '/team',
   '/settings',

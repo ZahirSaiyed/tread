@@ -60,7 +60,7 @@ export async function middleware(request: NextRequest) {
   if (role === 'operator' && (pathname === '/jobs' || pathname.startsWith('/jobs/'))) {
     return NextResponse.redirect(new URL('/dashboard', request.url))
   }
-  if (role === 'tech' && pathname === '/dashboard') {
+  if (role === 'tech' && (pathname === '/dashboard' || pathname.startsWith('/dashboard/'))) {
     return NextResponse.redirect(new URL('/jobs', request.url))
   }
 

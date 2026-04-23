@@ -3,7 +3,7 @@ import { createClient } from '@/lib/supabase/server'
 import { getAuthUser } from '@/lib/auth/session'
 import { listJobs } from '@/lib/db/jobs'
 import { CreateJobSchema } from '@/lib/validators/job'
-import type { JobStatus } from '@/types/enums'
+import { parseListJobsQuery } from '@/lib/validators/jobsListQuery'
 import type { ApiError, PaginatedResponse } from '@/types/api'
 import type { Job } from '@/types/domain'
 
@@ -12,30 +12,32 @@ export async function GET(request: NextRequest): Promise<NextResponse<PaginatedR
   const user = await getAuthUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-  const { searchParams } = request.nextUrl
-  const statusParam = searchParams.get('status')
-  const status = statusParam
-    ? (statusParam.split(',').filter(Boolean) as JobStatus[])
-    : undefined
-  const page = Math.max(1, Number(searchParams.get('page') ?? '1'))
-  const pageSize = Math.max(1, Math.min(100, Number(searchParams.get('pageSize') ?? '20')))
-  const assignedTechId = searchParams.get('assigned_tech_id') ?? undefined
+  const parsed = parseListJobsQuery(request.nextUrl.searchParams)
+  if (!parsed.ok) {
+    return NextResponse.json({ error: parsed.error }, { status: 400 })
+  }
+  const q = parsed.data
 
   // Techs can only list their own jobs — enforce by overriding the filter
-  const resolvedTechFilter =
-    user.role === 'tech' ? user.id : assignedTechId
+  const resolvedTechFilter = user.role === 'tech' ? user.id : q.assignedTechId
+  const resolvedUnassigned =
+    user.role === 'tech' ? undefined : q.unassignedOnly ? true : undefined
 
   try {
     const supabase = await createClient()
     const { data, count } = await listJobs(supabase, {
       tenantId: user.tenant_id,
-      status,
+      status: q.status,
       assignedTechId: resolvedTechFilter,
-      page,
-      pageSize,
+      unassignedOnly: resolvedUnassigned,
+      serviceTypes: user.role === 'tech' ? undefined : q.serviceTypes,
+      createdFromIso: user.role === 'tech' ? undefined : q.createdFromIso,
+      createdToIso: user.role === 'tech' ? undefined : q.createdToIso,
+      page: q.page,
+      pageSize: q.pageSize,
     })
 
-    return NextResponse.json({ data, count, page, pageSize })
+    return NextResponse.json({ data, count, page: q.page, pageSize: q.pageSize })
   } catch {
     return NextResponse.json({ error: 'Failed to fetch jobs' }, { status: 500 })
   }

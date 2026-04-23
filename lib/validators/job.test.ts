@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest'
 import {
   CreateJobSchema,
+  PatchJobSchema,
   UpdateJobStatusSchema,
   AssignTechSchema,
   isValidTransition,
@@ -145,6 +146,25 @@ describe('UpdateJobStatusSchema', () => {
 
   it('rejects an invalid status value', () => {
     const r = UpdateJobStatusSchema.safeParse({ status: 'driving' })
+    expect(r.success).toBe(false)
+  })
+})
+
+// ─── PatchJobSchema ───────────────────────────────────────────────────────────
+
+describe('PatchJobSchema', () => {
+  it('accepts a single-field patch', () => {
+    const r = PatchJobSchema.safeParse({ customer_name: 'Updated' })
+    expect(r.success).toBe(true)
+  })
+
+  it('rejects empty body', () => {
+    const r = PatchJobSchema.safeParse({})
+    expect(r.success).toBe(false)
+  })
+
+  it('rejects unknown keys (strict)', () => {
+    const r = PatchJobSchema.safeParse({ customer_name: 'X', status: 'pending' })
     expect(r.success).toBe(false)
   })
 })

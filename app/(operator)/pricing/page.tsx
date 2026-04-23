@@ -26,7 +26,7 @@ export default async function PricingPage() {
   const serviceTypes = Object.keys(grouped) as ServiceType[]
 
   return (
-    <main className="p-6 max-w-5xl mx-auto">
+    <main className="mx-auto max-w-5xl p-6 pb-[max(6rem,calc(4.5rem+env(safe-area-inset-bottom,0px)))]">
       <div className="mb-8">
         <h1 className="text-white text-2xl font-bold font-['Syne',sans-serif]">Pricing</h1>
         <p className="text-[#8E8E93] text-sm mt-1">

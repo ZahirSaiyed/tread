@@ -41,6 +41,14 @@ export const CreateJobSchema = z.object({
 
 export type CreateJobInput = z.infer<typeof CreateJobSchema>
 
+/** PATCH /api/jobs/[id] — operator edits before dispatch (no status / assignment here). */
+export const PatchJobSchema = CreateJobSchema.omit({ source: true, assigned_tech_id: true })
+  .partial()
+  .strict()
+  .refine((obj) => Object.keys(obj).length > 0, { message: 'Provide at least one field to update' })
+
+export type PatchJobInput = z.infer<typeof PatchJobSchema>
+
 // Allowed status transitions (from → allowed tos)
 const STATUS_TRANSITIONS: Record<JobStatus, JobStatus[]> = {
   pending:   ['assigned', 'cancelled'],
