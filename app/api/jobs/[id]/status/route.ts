@@ -1,7 +1,8 @@
 import { NextResponse, type NextRequest } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { getAuthUser } from '@/lib/auth/session'
-import { getJob, updateJobStatus } from '@/lib/db/jobs'
+import { getJob, getJobPhotos, updateJobStatus } from '@/lib/db/jobs'
+import { hasCompletionPhotos } from '@/lib/tech/jobPhotos'
 import { UpdateJobStatusSchema, isValidTransition } from '@/lib/validators/job'
 import type { ApiError } from '@/types/api'
 import type { Job } from '@/types/domain'
@@ -52,9 +53,23 @@ export async function PATCH(
       )
     }
 
+    if (newStatus === 'complete') {
+      const photos = await getJobPhotos(supabase, id)
+      if (!hasCompletionPhotos(photos)) {
+        return NextResponse.json(
+          {
+            error:
+              'Upload before, during, and after photos before completing this job.',
+          },
+          { status: 422 },
+        )
+      }
+    }
+
     const updated = await updateJobStatus(supabase, {
       jobId: id,
       tenantId: user.tenant_id,
+      previousStatus: job.status as JobStatus,
       newStatus: newStatus as JobStatus,
       cancellationReason: cancellation_reason,
       updatedBy: user.id,

@@ -2,6 +2,7 @@ import { NextResponse, type NextRequest } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { getAuthUser } from '@/lib/auth/session'
 import { getJob, getJobEvents, getJobPhotos } from '@/lib/db/jobs'
+import { withSignedJobPhotoUrls } from '@/lib/tech/signJobPhotos'
 import type { ApiError, JobDetail } from '@/types/api'
 
 // GET /api/jobs/[id]
@@ -30,7 +31,9 @@ export async function GET(
       getJobPhotos(supabase, id),
     ])
 
-    return NextResponse.json({ ...job, events, photos })
+    const photosOut = await withSignedJobPhotoUrls(supabase, photos)
+
+    return NextResponse.json({ ...job, events, photos: photosOut })
   } catch {
     return NextResponse.json({ error: 'Failed to fetch job' }, { status: 500 })
   }

@@ -27,6 +27,10 @@ async function fetchJobsPage(): Promise<Job[]> {
   return json.data ?? []
 }
 
+/** Bottom inset: nav bar + thumb reach + iOS home indicator. */
+const LIST_SCROLL_PADDING_BOTTOM =
+  'pb-[max(7rem,calc(4.5rem+env(safe-area-inset-bottom,0px)))]'
+
 export function TechJobsDashboard() {
   const [jobs, setJobs] = useState<Job[]>([])
   const [loading, setLoading] = useState(true)
@@ -38,7 +42,19 @@ export function TechJobsDashboard() {
 
   const scrollRef = useRef<HTMLDivElement>(null)
   const pullStartY = useRef<number | null>(null)
+  const pullOffsetRef = useRef(0)
+  const pullRaf = useRef<number | null>(null)
   const [pullOffset, setPullOffset] = useState(0)
+  const [seedBusy, setSeedBusy] = useState(false)
+
+  const schedulePullVisual = useCallback((value: number) => {
+    pullOffsetRef.current = value
+    if (pullRaf.current != null) return
+    pullRaf.current = requestAnimationFrame(() => {
+      pullRaf.current = null
+      setPullOffset(pullOffsetRef.current)
+    })
+  }, [])
 
   const load = useCallback(async (opts?: { silent?: boolean }) => {
     const silent = opts?.silent ?? false
@@ -57,6 +73,24 @@ export function TechJobsDashboard() {
       setRefreshing(false)
     }
   }, [])
+
+  const seedDemoJobs = useCallback(async () => {
+    setSeedBusy(true)
+    try {
+      const res = await fetch('/api/dev/seed-jobs', { method: 'POST' })
+      const body = (await res.json()) as { error?: string; hint?: string; message?: string }
+      if (!res.ok) {
+        const msg =
+          typeof body.hint === 'string' ? `${body.error ?? 'Failed'} — ${body.hint}` : body.error ?? 'Failed'
+        toast.error(msg)
+        return
+      }
+      toast.success(body.message ?? 'Demo jobs loaded')
+      await load()
+    } finally {
+      setSeedBusy(false)
+    }
+  }, [load])
 
   useEffect(() => {
     void load()
@@ -102,38 +136,47 @@ export function TechJobsDashboard() {
     if (!el || start === null || el.scrollTop > 0) return
     const y = e.touches[0]?.clientY ?? start
     const dy = Math.max(0, y - start)
-    if (dy > 0) setPullOffset(Math.min(dy, 120))
+    if (dy > 0) schedulePullVisual(Math.min(dy, 120))
   }
 
   const endPull = () => {
     pullStartY.current = null
-    if (pullOffset >= 72) {
+    if (pullRaf.current != null) {
+      cancelAnimationFrame(pullRaf.current)
+      pullRaf.current = null
+    }
+    if (pullOffsetRef.current >= 72) {
       void load({ silent: true })
     }
+    pullOffsetRef.current = 0
     setPullOffset(0)
   }
 
   if (loading) {
     return (
-      <div className="space-y-4 px-4 pt-4 pb-28" aria-busy="true" aria-label="Loading jobs">
-        <div className="h-8 w-40 rounded-lg bg-trs-slate animate-pulse" />
-        <div className="grid grid-cols-3 gap-2">
+      <div className="flex min-h-0 flex-1 flex-col">
+        <div className="shrink-0 space-y-4 px-4 pt-2 pb-3">
+          <div className="h-8 w-40 rounded-lg bg-trs-slate animate-pulse" />
+          <div className="grid grid-cols-3 gap-2">
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="h-16 rounded-xl bg-trs-slate animate-pulse" />
+            ))}
+          </div>
+          <div className="h-10 rounded-xl bg-trs-slate animate-pulse" />
+          <div className="h-12 rounded-xl bg-trs-slate animate-pulse" />
+        </div>
+        <div className={`min-h-0 flex-1 space-y-4 overflow-y-auto px-4 ${LIST_SCROLL_PADDING_BOTTOM}`}>
           {[1, 2, 3].map((i) => (
-            <div key={i} className="h-16 rounded-xl bg-trs-slate animate-pulse" />
+            <div key={i} className="h-48 rounded-2xl bg-trs-charcoal border border-trs-slate animate-pulse" />
           ))}
         </div>
-        <div className="h-10 rounded-xl bg-trs-slate animate-pulse" />
-        <div className="h-12 rounded-xl bg-trs-slate animate-pulse" />
-        {[1, 2, 3].map((i) => (
-          <div key={i} className="h-48 rounded-2xl bg-trs-charcoal border border-trs-slate animate-pulse" />
-        ))}
       </div>
     )
   }
 
   if (error && jobs.length === 0) {
     return (
-      <div className="px-4 pt-8 pb-28 text-center">
+      <div className="flex min-h-0 flex-1 flex-col items-center justify-center px-4 pb-28 text-center">
         <p className="text-[#8E8E93] mb-4">{error}</p>
         <button
           type="button"
@@ -147,30 +190,29 @@ export function TechJobsDashboard() {
   }
 
   return (
-    <div className="flex flex-col min-h-0 flex-1">
+    <div className="flex min-h-0 flex-1 flex-col">
+      {/* Pull-to-refresh hint — never transforms the scroll layer (avoids fighting native scroll). */}
       <div
-        className="text-center text-xs text-trs-gold font-medium transition-opacity"
-        style={{ height: pullOffset > 8 ? 24 : 0, opacity: pullOffset > 8 ? 1 : 0 }}
+        className="pointer-events-none flex shrink-0 justify-center overflow-hidden transition-[height,opacity] duration-150"
+        style={{
+          height: pullOffset > 8 ? 28 : 0,
+          opacity: pullOffset > 8 ? 1 : 0,
+        }}
         aria-live="polite"
       >
-        {pullOffset >= 72 ? 'Release to refresh' : 'Pull to refresh'}
+        <span className="pt-1 text-xs font-medium text-trs-gold">
+          {pullOffset >= 72 ? 'Release to refresh' : 'Pull to refresh'}
+        </span>
       </div>
 
-      <div
-        ref={scrollRef}
-        className="flex-1 overflow-y-auto overscroll-y-contain px-4 pb-28"
-        onTouchStart={onTouchStart}
-        onTouchMove={onTouchMove}
-        onTouchEnd={endPull}
-        onTouchCancel={endPull}
-        style={{ transform: pullOffset > 0 ? `translateY(${pullOffset * 0.35}px)` : undefined }}
-      >
-        <header className="pt-2 pb-4">
+      {/* Fixed chrome: only the list scrolls beneath (mobile-native pattern). */}
+      <div className="shrink-0 border-b border-white/[0.06] bg-black/90 px-4 pb-3 pt-1 backdrop-blur-md supports-[backdrop-filter]:bg-black/75">
+        <header className="pb-3 pt-1">
           <h1 className="font-display text-2xl font-bold text-white">My Jobs</h1>
-          <p className="text-sm text-[#8E8E93] mt-1">Live updates from dispatch</p>
+          <p className="mt-1 text-sm text-[#8E8E93]">Live updates from dispatch</p>
         </header>
 
-        <section className="grid grid-cols-3 gap-2 mb-4" aria-label="Job counts">
+        <section className="mb-4 grid grid-cols-3 gap-2" aria-label="Job counts">
           <MetricCard label="Today" value={metrics.createdToday} />
           <MetricCard label="Pending" value={metrics.pending} />
           <MetricCard label="Done today" value={metrics.doneToday} />
@@ -182,15 +224,16 @@ export function TechJobsDashboard() {
         <input
           id="job-search"
           type="search"
+          enterKeyHint="search"
           placeholder="Search name or address…"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="w-full rounded-xl border border-trs-slate bg-trs-charcoal px-4 py-3 text-base text-white placeholder:text-[#48484A] focus:border-trs-gold focus:outline-none mb-4"
+          className="mb-3 w-full rounded-xl border border-trs-slate bg-trs-charcoal px-4 py-3 text-base text-white placeholder:text-[#48484A] focus:border-trs-gold focus:outline-none"
           autoComplete="off"
         />
 
         <div
-          className="flex gap-2 overflow-x-auto pb-2 mb-2 -mx-1 px-1"
+          className="-mx-4 flex touch-pan-x gap-2 overflow-x-auto overscroll-x-contain px-4 pb-1 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
           role="tablist"
           aria-label="Status filter"
         >
@@ -201,10 +244,8 @@ export function TechJobsDashboard() {
               role="tab"
               aria-selected={tab === key}
               onClick={() => setTab(key)}
-              className={`shrink-0 rounded-full px-4 py-2 text-sm font-medium transition-colors ${
-                tab === key
-                  ? 'bg-trs-gold text-black'
-                  : 'bg-trs-slate text-[#8E8E93] hover:text-white'
+              className={`shrink-0 snap-start rounded-full px-4 py-2.5 text-sm font-medium transition-colors ${
+                tab === key ? 'bg-trs-gold text-black' : 'bg-trs-slate text-[#8E8E93] hover:text-white'
               }`}
             >
               {TECH_JOBS_TAB_LABELS[key]}
@@ -213,24 +254,53 @@ export function TechJobsDashboard() {
         </div>
 
         {refreshing ? (
-          <p className="text-center text-xs text-[#8E8E93] py-2">Refreshing…</p>
+          <p className="pt-2 text-center text-xs text-[#8E8E93]">Refreshing…</p>
         ) : null}
+      </div>
 
+      {/* Single scroll surface for the job list — momentum + no transform jank. */}
+      <div
+        ref={scrollRef}
+        className={`min-h-0 flex-1 touch-pan-y overflow-x-hidden overflow-y-auto overscroll-y-contain ${LIST_SCROLL_PADDING_BOTTOM} px-4 [-webkit-overflow-scrolling:touch]`}
+        onTouchStart={onTouchStart}
+        onTouchMove={onTouchMove}
+        onTouchEnd={endPull}
+        onTouchCancel={endPull}
+      >
         {visibleJobs.length === 0 ? (
           <div className="rounded-2xl border border-dashed border-trs-slate bg-trs-charcoal/50 px-4 py-12 text-center">
-            <p className="text-white font-medium">
-              {jobs.length === 0
-                ? 'No active jobs today'
-                : 'No jobs match this filter'}
+            <p className="font-medium text-white">
+              {jobs.length === 0 ? 'No active jobs today' : 'No jobs match this filter'}
             </p>
-            <p className="text-sm text-[#8E8E93] mt-2">
+            <p className="mt-2 text-sm text-[#8E8E93]">
               {jobs.length === 0
                 ? 'Waiting for assignments from dispatch.'
                 : 'Try another filter or clear your search.'}
             </p>
+            {jobs.length === 0 && process.env.NODE_ENV === 'development' ? (
+              <div className="mt-6 rounded-xl border border-trs-slate bg-trs-charcoal px-4 py-4 text-left">
+                <p className="text-xs leading-relaxed text-[#8E8E93]">
+                  <span className="font-mono text-trs-gold">DEV</span>: On{' '}
+                  <span className="text-white">/login</span> use the panel to sign in as{' '}
+                  <strong className="text-white">Marcus</strong> once (creates the tech profile). Then load
+                  sample jobs assigned to you.
+                </p>
+                <button
+                  type="button"
+                  disabled={seedBusy}
+                  onClick={() => void seedDemoJobs()}
+                  className="mt-3 min-h-touch w-full rounded-xl bg-trs-gold px-4 py-2.5 text-sm font-semibold text-black transition-colors hover:bg-trs-gold-dark disabled:opacity-50"
+                >
+                  {seedBusy ? 'Loading…' : 'Load demo jobs'}
+                </button>
+                <p className="mt-2 font-mono text-[10px] text-[#48484A]">
+                  Requires .env.local service role + TRS tenant seed. Re-click to reset those four demo rows.
+                </p>
+              </div>
+            ) : null}
           </div>
         ) : (
-          <ul className="space-y-4">
+          <ul className="space-y-4 pb-1 pt-1">
             {visibleJobs.map((job) => (
               <li key={job.id}>
                 <JobCard job={job} />
@@ -245,9 +315,9 @@ export function TechJobsDashboard() {
 
 function MetricCard({ label, value }: { label: string; value: number }) {
   return (
-    <div className="rounded-xl bg-trs-charcoal border border-trs-slate px-2 py-3 text-center">
-      <p className="font-mono text-2xl font-semibold text-white tabular-nums">{value}</p>
-      <p className="text-xs text-[#8E8E93] mt-1">{label}</p>
+    <div className="rounded-xl border border-trs-slate bg-trs-charcoal px-2 py-3 text-center">
+      <p className="font-mono text-2xl font-semibold tabular-nums text-white">{value}</p>
+      <p className="mt-1 text-xs text-[#8E8E93]">{label}</p>
     </div>
   )
 }

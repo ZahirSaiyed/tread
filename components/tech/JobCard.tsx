@@ -1,6 +1,15 @@
+'use client'
+
+import Link from 'next/link'
+import { useLayoutEffect, useState } from 'react'
 import type { Job } from '@/types/domain'
 import type { JobStatus } from '@/types/enums'
 import { JOB_STATUS_LABELS, SERVICE_TYPE_LABELS } from '@/types/enums'
+import {
+  directionsUrlForDevice,
+  googleDirectionsUrl,
+  telUrl,
+} from '@/lib/tech/jobActions'
 
 function statusAccent(status: JobStatus): { dot: string; border: string; labelClass: string } {
   switch (status) {
@@ -37,16 +46,6 @@ function vehicleLine(job: Job): string | null {
   return parts.join(' ')
 }
 
-function mapsUrl(address: string): string {
-  return `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(address)}`
-}
-
-function telUrl(phone: string): string {
-  const cleaned = phone.replace(/[^\d+]/g, '')
-  if (!cleaned) return '#'
-  return cleaned.startsWith('+') ? `tel:${cleaned}` : `tel:+${cleaned}`
-}
-
 export interface JobCardProps {
   job: Job
 }
@@ -59,41 +58,49 @@ export function JobCard({ job }: JobCardProps) {
   const statusHeading = inProgress ? 'IN PROGRESS' : statusLabel.toUpperCase()
   const vehicle = vehicleLine(job)
 
+  const [mapsHref, setMapsHref] = useState(() => googleDirectionsUrl(job.address))
+  useLayoutEffect(() => {
+    setMapsHref(directionsUrlForDevice(job.address))
+  }, [job.address])
+
   return (
     <article
       className={`rounded-2xl border border-trs-slate bg-trs-charcoal border-l-4 ${border} pl-4 pr-3 py-4 shadow-sm`}
     >
-      <div className="flex items-start justify-between gap-2 mb-3">
-        <div className="flex items-center gap-2 min-w-0">
-          <span className={`h-2 w-2 shrink-0 rounded-full ${dot}`} aria-hidden />
-          <span className={`text-xs font-semibold tracking-wide ${labelClass}`}>{statusHeading}</span>
+      <Link href={`/jobs/${job.id}`} className="block rounded-lg outline-none focus-visible:ring-2 focus-visible:ring-trs-gold">
+        <div className="flex items-start justify-between gap-2 mb-3">
+          <div className="flex items-center gap-2 min-w-0">
+            <span className={`h-2 w-2 shrink-0 rounded-full ${dot}`} aria-hidden />
+            <span className={`text-xs font-semibold tracking-wide ${labelClass}`}>{statusHeading}</span>
+          </div>
+          <time className="text-xs text-[#8E8E93] shrink-0 font-mono tabular-nums" dateTime={job.created_at}>
+            {formatShortDate(job.created_at)}
+          </time>
         </div>
-        <time className="text-xs text-[#8E8E93] shrink-0 font-mono tabular-nums" dateTime={job.created_at}>
-          {formatShortDate(job.created_at)}
-        </time>
-      </div>
 
-      <h2 className="font-display text-lg text-white font-semibold leading-tight">{job.customer_name}</h2>
-      <p className="text-sm text-trs-gold mt-1">{serviceLabel}</p>
+        <h2 className="font-display text-lg text-white font-semibold leading-tight">{job.customer_name}</h2>
+        <p className="text-sm text-trs-gold mt-1">{serviceLabel}</p>
 
-      <p className="text-sm text-[#8E8E93] mt-3 flex gap-2">
-        <span aria-hidden>📍</span>
-        <span className="break-words">{job.address}</span>
-      </p>
-      {vehicle ? (
-        <p className="text-sm text-[#8E8E93] mt-2 flex gap-2">
-          <span aria-hidden>🚗</span>
-          <span>{vehicle}</span>
+        <p className="text-sm text-[#8E8E93] mt-3 flex gap-2">
+          <span aria-hidden>📍</span>
+          <span className="break-words">{job.address}</span>
         </p>
-      ) : null}
-      <p className="text-sm text-[#8E8E93] mt-2 flex gap-2">
-        <span aria-hidden>⏰</span>
-        <span className="font-mono tabular-nums">{formatTime(job.created_at)}</span>
-      </p>
+        {vehicle ? (
+          <p className="text-sm text-[#8E8E93] mt-2 flex gap-2">
+            <span aria-hidden>🚗</span>
+            <span>{vehicle}</span>
+          </p>
+        ) : null}
+        <p className="text-sm text-[#8E8E93] mt-2 flex gap-2">
+          <span aria-hidden>⏰</span>
+          <span className="font-mono tabular-nums">{formatTime(job.created_at)}</span>
+        </p>
+        <p className="text-xs text-trs-gold/80 mt-2 font-medium">View job details →</p>
+      </Link>
 
       <div className="mt-4 flex flex-wrap gap-2">
         <a
-          href={mapsUrl(job.address)}
+          href={mapsHref}
           target="_blank"
           rel="noopener noreferrer"
           className="inline-flex min-h-touch min-w-touch items-center justify-center rounded-xl bg-trs-slate px-4 text-sm font-medium text-white hover:bg-trs-gold/20 hover:text-trs-gold transition-colors"

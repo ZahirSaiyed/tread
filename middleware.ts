@@ -56,8 +56,8 @@ export async function middleware(request: NextRequest) {
 
   const role = profile.role as Role
 
-  // Role-based redirect on login: if operator hits /jobs (tech route), send to dashboard
-  if (role === 'operator' && pathname === '/jobs') {
+  // Role-based redirect: tech routes are for field techs only
+  if (role === 'operator' && (pathname === '/jobs' || pathname.startsWith('/jobs/'))) {
     return NextResponse.redirect(new URL('/dashboard', request.url))
   }
   if (role === 'tech' && pathname === '/dashboard') {

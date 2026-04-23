@@ -3,17 +3,20 @@
 import { useState } from 'react'
 import { z } from 'zod'
 import { createClient } from '@/lib/supabase/client'
+import { TenantLogo } from '@/components/branding/TenantLogo'
+import type { TenantBranding } from '@/lib/branding/types'
 
 const emailSchema = z.string().email('Enter a valid email address')
 
 interface LoginFormProps {
   redirectTo?: string
   serverError?: string
+  branding: TenantBranding
 }
 
 type State = 'idle' | 'loading' | 'sent' | 'error'
 
-export function LoginForm({ redirectTo, serverError }: LoginFormProps) {
+export function LoginForm({ redirectTo, serverError, branding }: LoginFormProps) {
   const [email, setEmail] = useState('')
   const [state, setState] = useState<State>(serverError ? 'error' : 'idle')
   const [errorMessage, setErrorMessage] = useState(
@@ -62,12 +65,19 @@ export function LoginForm({ redirectTo, serverError }: LoginFormProps) {
 
   return (
     <div>
-      {/* Logo / brand */}
-      <div className="mb-8 text-center">
-        <div className="text-[#F5A623] text-2xl font-bold tracking-tight font-['Syne',sans-serif]">
-          TRS
+      <div className="mb-8 flex w-full flex-col items-center gap-4 text-center">
+        <TenantLogo branding={branding} size="lg" priority />
+        <div className="w-full min-w-0 px-1">
+          <h1 className="font-display text-balance text-lg font-semibold tracking-tight text-white sm:text-xl">
+            {branding.companyName}
+          </h1>
+          <span
+            className="mx-auto mt-2 block h-0.5 w-12 rounded-full"
+            style={{ backgroundColor: branding.primaryColor }}
+            aria-hidden
+          />
+          <p className="mt-3 text-sm text-[#8E8E93]">Operator sign in</p>
         </div>
-        <p className="text-[#8E8E93] text-sm mt-1">Operator Sign In</p>
       </div>
 
       {state === 'sent' ? (
@@ -86,7 +96,8 @@ export function LoginForm({ redirectTo, serverError }: LoginFormProps) {
           </p>
           <button
             onClick={() => setState('idle')}
-            className="mt-4 text-[#F5A623] text-sm underline-offset-2 hover:underline"
+            className="mt-4 text-sm underline-offset-2 hover:underline"
+            style={{ color: branding.primaryColor }}
           >
             Use a different email
           </button>
@@ -137,7 +148,11 @@ export function LoginForm({ redirectTo, serverError }: LoginFormProps) {
 
           <p className="text-center text-[#48484A] text-sm mt-4">
             Are you a tech?{' '}
-            <a href="/login-tech" className="text-[#F5A623] hover:underline">
+            <a
+              href="/login-tech"
+              className="font-medium underline-offset-2 hover:underline"
+              style={{ color: branding.primaryColor }}
+            >
               Sign in with phone
             </a>
           </p>

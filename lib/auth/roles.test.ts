@@ -35,6 +35,10 @@ const admin: AuthUser = {
 }
 
 describe('isPublicRoute', () => {
+  it('marks / as public (home; anon users redirected to /login from the page)', () => {
+    expect(isPublicRoute('/')).toBe(true)
+  })
+
   it('marks /login as public', () => {
     expect(isPublicRoute('/login')).toBe(true)
   })

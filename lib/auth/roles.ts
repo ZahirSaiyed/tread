@@ -23,6 +23,8 @@ export const PUBLIC_ROUTES = [
 ]
 
 export function isPublicRoute(pathname: string): boolean {
+  // Exact `/` only — do not use `startsWith('/')` or every path would be public.
+  if (pathname === '/') return true
   return PUBLIC_ROUTES.some(
     (route) => pathname === route || pathname.startsWith(`${route}/`),
   )

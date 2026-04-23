@@ -89,6 +89,8 @@ export interface JobPhoto {
   tenant_id: string
   photo_type: PhotoType
   storage_url: string
+  /** Object path in the `job-photos` bucket when `storage_url` is a signed URL (API detail). */
+  storage_path?: string | null
   uploaded_by: string
   created_at: string
 }

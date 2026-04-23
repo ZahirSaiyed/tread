@@ -4,6 +4,8 @@ import { useState } from 'react'
 import { z } from 'zod'
 import { createClient } from '@/lib/supabase/client'
 import { defaultRedirectForRole } from '@/lib/auth/roles'
+import { TenantLogo } from '@/components/branding/TenantLogo'
+import type { TenantBranding } from '@/lib/branding/types'
 
 const phoneSchema = z
   .string()
@@ -15,11 +17,12 @@ const otpSchema = z
 
 interface PhoneOtpFormProps {
   redirectTo?: string
+  branding: TenantBranding
 }
 
 type Step = 'phone' | 'otp' | 'error'
 
-export function PhoneOtpForm({ redirectTo }: PhoneOtpFormProps) {
+export function PhoneOtpForm({ redirectTo, branding }: PhoneOtpFormProps) {
   const [step, setStep] = useState<Step>('phone')
   const [phone, setPhone] = useState('')
   const [otp, setOtp] = useState('')
@@ -100,11 +103,19 @@ export function PhoneOtpForm({ redirectTo }: PhoneOtpFormProps) {
 
   return (
     <div>
-      <div className="mb-8 text-center">
-        <div className="text-[#F5A623] text-2xl font-bold tracking-tight font-['Syne',sans-serif]">
-          TRS
+      <div className="mb-8 flex w-full flex-col items-center gap-4 text-center">
+        <TenantLogo branding={branding} size="lg" priority />
+        <div className="w-full min-w-0 px-1">
+          <h1 className="font-display text-balance text-lg font-semibold tracking-tight text-white sm:text-xl">
+            {branding.companyName}
+          </h1>
+          <span
+            className="mx-auto mt-2 block h-0.5 w-12 rounded-full"
+            style={{ backgroundColor: branding.primaryColor }}
+            aria-hidden
+          />
+          <p className="mt-3 text-sm text-[#8E8E93]">Tech sign in</p>
         </div>
-        <p className="text-[#8E8E93] text-sm mt-1">Tech Sign In</p>
       </div>
 
       <div className="bg-[#1C1C1E] rounded-2xl p-6">
@@ -199,7 +210,11 @@ export function PhoneOtpForm({ redirectTo }: PhoneOtpFormProps) {
 
       <p className="text-center text-[#48484A] text-sm mt-4">
         Are you an operator?{' '}
-        <a href="/login" className="text-[#F5A623] hover:underline">
+        <a
+          href="/login"
+          className="font-medium underline-offset-2 hover:underline"
+          style={{ color: branding.primaryColor }}
+        >
           Sign in with email
         </a>
       </p>

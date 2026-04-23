@@ -2,6 +2,9 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { PhoneOtpForm } from './PhoneOtpForm'
+import { TEST_TENANT_BRANDING } from '@/tests/fixtures/branding'
+
+const testBranding = TEST_TENANT_BRANDING
 
 const mockSignInWithOtp = vi.fn()
 const mockVerifyOtp = vi.fn()
@@ -35,7 +38,7 @@ describe('PhoneOtpForm', () => {
   })
 
   it('renders phone input on first step', () => {
-    render(<PhoneOtpForm />)
+    render(<PhoneOtpForm branding={testBranding} />)
     expect(screen.getByLabelText(/phone number/i)).toBeInTheDocument()
     expect(screen.getByRole('button', { name: /send code/i })).toBeInTheDocument()
   })
@@ -43,7 +46,7 @@ describe('PhoneOtpForm', () => {
   it('normalizes phone number: strips dashes and prepends +1', async () => {
     const user = userEvent.setup()
     mockSignInWithOtp.mockResolvedValue({ error: null })
-    render(<PhoneOtpForm />)
+    render(<PhoneOtpForm branding={testBranding} />)
 
     await user.type(screen.getByLabelText(/phone number/i), '703-555-1234')
     await user.click(screen.getByRole('button', { name: /send code/i }))
@@ -57,7 +60,7 @@ describe('PhoneOtpForm', () => {
 
   it('shows validation error for invalid phone', async () => {
     const user = userEvent.setup()
-    render(<PhoneOtpForm />)
+    render(<PhoneOtpForm branding={testBranding} />)
 
     await user.type(screen.getByLabelText(/phone number/i), '12345')
     await user.click(screen.getByRole('button', { name: /send code/i }))
@@ -69,7 +72,7 @@ describe('PhoneOtpForm', () => {
   it('advances to OTP step after sending code', async () => {
     const user = userEvent.setup()
     mockSignInWithOtp.mockResolvedValue({ error: null })
-    render(<PhoneOtpForm />)
+    render(<PhoneOtpForm branding={testBranding} />)
 
     await user.type(screen.getByLabelText(/phone number/i), '+17035551234')
     await user.click(screen.getByRole('button', { name: /send code/i }))
@@ -81,7 +84,7 @@ describe('PhoneOtpForm', () => {
   it('only allows digits in OTP field', async () => {
     const user = userEvent.setup()
     mockSignInWithOtp.mockResolvedValue({ error: null })
-    render(<PhoneOtpForm />)
+    render(<PhoneOtpForm branding={testBranding} />)
 
     await user.type(screen.getByLabelText(/phone number/i), '+17035551234')
     await user.click(screen.getByRole('button', { name: /send code/i }))
@@ -95,7 +98,7 @@ describe('PhoneOtpForm', () => {
   it('verify button disabled until 6 digits entered', async () => {
     const user = userEvent.setup()
     mockSignInWithOtp.mockResolvedValue({ error: null })
-    render(<PhoneOtpForm />)
+    render(<PhoneOtpForm branding={testBranding} />)
 
     await user.type(screen.getByLabelText(/phone number/i), '+17035551234')
     await user.click(screen.getByRole('button', { name: /send code/i }))
@@ -110,7 +113,7 @@ describe('PhoneOtpForm', () => {
     const user = userEvent.setup()
     mockSignInWithOtp.mockResolvedValue({ error: null })
     mockVerifyOtp.mockResolvedValue({ data: { user: null }, error: new Error('Invalid OTP') })
-    render(<PhoneOtpForm />)
+    render(<PhoneOtpForm branding={testBranding} />)
 
     await user.type(screen.getByLabelText(/phone number/i), '+17035551234')
     await user.click(screen.getByRole('button', { name: /send code/i }))
@@ -125,7 +128,7 @@ describe('PhoneOtpForm', () => {
   it('can go back to phone step from OTP step', async () => {
     const user = userEvent.setup()
     mockSignInWithOtp.mockResolvedValue({ error: null })
-    render(<PhoneOtpForm />)
+    render(<PhoneOtpForm branding={testBranding} />)
 
     await user.type(screen.getByLabelText(/phone number/i), '+17035551234')
     await user.click(screen.getByRole('button', { name: /send code/i }))
@@ -137,7 +140,7 @@ describe('PhoneOtpForm', () => {
   })
 
   it('link to operator login is visible', () => {
-    render(<PhoneOtpForm />)
+    render(<PhoneOtpForm branding={testBranding} />)
     const link = screen.getByRole('link', { name: /sign in with email/i })
     expect(link).toHaveAttribute('href', '/login')
   })

@@ -2,6 +2,9 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { LoginForm } from './LoginForm'
+import { TEST_TENANT_BRANDING } from '@/tests/fixtures/branding'
+
+const testBranding = TEST_TENANT_BRANDING
 
 // Mock Supabase client
 const mockSignInWithOtp = vi.fn()
@@ -22,19 +25,19 @@ describe('LoginForm', () => {
   })
 
   it('renders email input and submit button', () => {
-    render(<LoginForm />)
+    render(<LoginForm branding={testBranding} />)
     expect(screen.getByLabelText(/email address/i)).toBeInTheDocument()
     expect(screen.getByRole('button', { name: /send sign-in link/i })).toBeInTheDocument()
   })
 
   it('submit button is disabled when email is empty', () => {
-    render(<LoginForm />)
+    render(<LoginForm branding={testBranding} />)
     expect(screen.getByRole('button', { name: /send sign-in link/i })).toBeDisabled()
   })
 
   it('shows validation error for invalid email', async () => {
     const user = userEvent.setup()
-    render(<LoginForm />)
+    render(<LoginForm branding={testBranding} />)
 
     await user.type(screen.getByLabelText(/email address/i), 'notanemail')
     await user.click(screen.getByRole('button', { name: /send sign-in link/i }))
@@ -46,7 +49,7 @@ describe('LoginForm', () => {
   it('calls signInWithOtp with correct email on valid submit', async () => {
     const user = userEvent.setup()
     mockSignInWithOtp.mockResolvedValue({ error: null })
-    render(<LoginForm />)
+    render(<LoginForm branding={testBranding} />)
 
     await user.type(screen.getByLabelText(/email address/i), 'tony@trs.com')
     await user.click(screen.getByRole('button', { name: /send sign-in link/i }))
@@ -64,7 +67,7 @@ describe('LoginForm', () => {
   it('shows success state after OTP sent', async () => {
     const user = userEvent.setup()
     mockSignInWithOtp.mockResolvedValue({ error: null })
-    render(<LoginForm />)
+    render(<LoginForm branding={testBranding} />)
 
     await user.type(screen.getByLabelText(/email address/i), 'tony@trs.com')
     await user.click(screen.getByRole('button', { name: /send sign-in link/i }))
@@ -76,7 +79,7 @@ describe('LoginForm', () => {
   it('shows error when supabase returns error', async () => {
     const user = userEvent.setup()
     mockSignInWithOtp.mockResolvedValue({ error: new Error('Rate limited') })
-    render(<LoginForm />)
+    render(<LoginForm branding={testBranding} />)
 
     await user.type(screen.getByLabelText(/email address/i), 'tony@trs.com')
     await user.click(screen.getByRole('button', { name: /send sign-in link/i }))
@@ -87,7 +90,7 @@ describe('LoginForm', () => {
   it('includes redirect param in callback URL when provided', async () => {
     const user = userEvent.setup()
     mockSignInWithOtp.mockResolvedValue({ error: null })
-    render(<LoginForm redirectTo="/dashboard" />)
+    render(<LoginForm branding={testBranding} redirectTo="/dashboard" />)
 
     await user.type(screen.getByLabelText(/email address/i), 'tony@trs.com')
     await user.click(screen.getByRole('button', { name: /send sign-in link/i }))
@@ -104,12 +107,12 @@ describe('LoginForm', () => {
   })
 
   it('shows server error for expired link', () => {
-    render(<LoginForm serverError="auth_failed" />)
+    render(<LoginForm branding={testBranding} serverError="auth_failed" />)
     expect(screen.getByRole('alert')).toHaveTextContent(/sign-in link expired/i)
   })
 
   it('link to tech login is visible', () => {
-    render(<LoginForm />)
+    render(<LoginForm branding={testBranding} />)
     const link = screen.getByRole('link', { name: /sign in with phone/i })
     expect(link).toHaveAttribute('href', '/login-tech')
   })

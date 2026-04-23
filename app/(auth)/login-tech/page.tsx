@@ -1,7 +1,10 @@
+import type { Metadata } from 'next'
 import { PhoneOtpForm } from '@/components/auth/PhoneOtpForm'
+import { getPublicAuthBranding } from '@/lib/branding/server'
 
-export const metadata = {
-  title: 'Tech Sign In — TRS Platform',
+export async function generateMetadata(): Promise<Metadata> {
+  const b = getPublicAuthBranding()
+  return { title: `Tech sign in — ${b.companyName}` }
 }
 
 interface LoginTechPageProps {
@@ -10,5 +13,6 @@ interface LoginTechPageProps {
 
 export default async function LoginTechPage({ searchParams }: LoginTechPageProps) {
   const { redirect } = await searchParams
-  return <PhoneOtpForm redirectTo={redirect} />
+  const branding = getPublicAuthBranding()
+  return <PhoneOtpForm branding={branding} redirectTo={redirect} />
 }

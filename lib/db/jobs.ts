@@ -102,6 +102,8 @@ const STATUS_TIMESTAMPS: Partial<Record<JobStatus, string>> = {
 export interface UpdateStatusOptions {
   jobId: string
   tenantId: string
+  /** Status before this update (for job_events audit). */
+  previousStatus: JobStatus
   newStatus: JobStatus
   cancellationReason?: string
   updatedBy: string
@@ -135,6 +137,7 @@ export async function updateJobStatus(
     tenantId: opts.tenantId,
     eventType: 'status_changed',
     payload: {
+      from: opts.previousStatus,
       to: opts.newStatus,
       ...(opts.cancellationReason ? { reason: opts.cancellationReason } : {}),
     },
