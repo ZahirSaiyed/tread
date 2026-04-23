@@ -19,6 +19,7 @@ export const PUBLIC_ROUTES = [
   '/login-tech',
   '/track',
   '/api/auth',
+  '/api/dev',
 ]
 
 export function isPublicRoute(pathname: string): boolean {
