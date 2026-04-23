@@ -1,6 +1,8 @@
 import { NextResponse, type NextRequest } from 'next/server'
-import { createClient, createServiceClient } from '@/lib/supabase/server'
+import { createServerClient } from '@supabase/ssr'
+import { createServiceClient } from '@/lib/supabase/server'
 import { defaultRedirectForRole } from '@/lib/auth/roles'
+import type { Database } from '@/types/database.types'
 import type { Role } from '@/types/enums'
 
 // DEV ONLY — 404s in production. No email, no magic link, no Supabase URL config.
@@ -9,9 +11,6 @@ import type { Role } from '@/types/enums'
 //   /api/dev/login               → Tony (operator)
 //   /api/dev/login?role=tech     → Marcus (tech)
 //   /api/dev/login?role=admin    → Admin
-//
-// On first call: creates the auth user + profile row, then signs in.
-// On repeat calls: signs in directly (idempotent).
 
 const DEV_PASSWORD = 'trs-dev-local-2024'
 const TRS_TENANT_ID = 'a1b2c3d4-0000-0000-0000-000000000001'
@@ -36,12 +35,10 @@ export async function GET(request: NextRequest) {
   // ── 1. Find or create the auth user ──────────────────────────────────────
   const { data: { users } } = await admin.auth.admin.listUsers()
   const existing = users.find(u => u.email === email)
-
   let userId: string
 
   if (existing) {
     userId = existing.id
-    // Keep password in sync in case it was never set
     await admin.auth.admin.updateUserById(userId, { password: DEV_PASSWORD })
   } else {
     const { data, error } = await admin.auth.admin.createUser({
@@ -61,8 +58,26 @@ export async function GET(request: NextRequest) {
     { onConflict: 'id' },
   )
 
-  // ── 3. Sign in with password — sets session cookies via next/headers ──────
-  const supabase = await createClient()
+  // ── 3. Build the redirect response first, then attach session cookies to it
+  // (cookies set via next/headers don't transfer to NextResponse.redirect)
+  const redirectUrl = new URL(defaultRedirectForRole(role), request.url)
+  const response = NextResponse.redirect(redirectUrl)
+
+  const supabase = createServerClient<Database>(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!,
+    {
+      cookies: {
+        getAll: () => request.cookies.getAll(),
+        setAll: (cookiesToSet) => {
+          cookiesToSet.forEach(({ name, value, options }) => {
+            response.cookies.set(name, value, options)
+          })
+        },
+      },
+    },
+  )
+
   const { error: signInError } = await supabase.auth.signInWithPassword({
     email,
     password: DEV_PASSWORD,
@@ -72,5 +87,5 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: signInError.message }, { status: 500 })
   }
 
-  return NextResponse.redirect(new URL(defaultRedirectForRole(role), request.url))
+  return response
 }
