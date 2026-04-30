@@ -2,16 +2,16 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
+import { LayoutDashboard, ClipboardList, DollarSign } from 'lucide-react'
 
 const items = [
-  { href: '/dashboard', label: 'Board' },
-  { href: '/dashboard/jobs', label: 'Jobs' },
-  { href: '/pricing', label: 'Pricing' },
+  { href: '/dashboard',      label: 'Board',   Icon: LayoutDashboard, exact: true  },
+  { href: '/dashboard/jobs', label: 'Jobs',    Icon: ClipboardList,   exact: false },
+  { href: '/pricing',        label: 'Pricing', Icon: DollarSign,      exact: false },
 ] as const
 
-function navItemActive(href: string, pathname: string): boolean {
-  if (href === '/dashboard') return pathname === '/dashboard'
-  return pathname === href || pathname.startsWith(`${href}/`)
+function isActive(href: string, pathname: string, exact: boolean): boolean {
+  return exact ? pathname === href : pathname === href || pathname.startsWith(`${href}/`)
 }
 
 export function OperatorBottomNav() {
@@ -23,16 +23,17 @@ export function OperatorBottomNav() {
       aria-label="Operator navigation"
     >
       <ul className="mx-auto flex max-w-lg">
-        {items.map(({ href, label }) => {
-          const isActive = navItemActive(href, pathname)
+        {items.map(({ href, label, Icon, exact }) => {
+          const active = isActive(href, pathname, exact)
           return (
             <li key={href} className="flex-1">
               <Link
                 href={href}
-                className={`flex min-h-touch flex-col items-center justify-center text-sm font-medium transition-colors ${
-                  isActive ? 'text-trs-gold' : 'text-[#8E8E93] hover:text-white'
+                className={`flex min-h-touch flex-col items-center justify-center gap-1 text-xs font-medium transition-colors ${
+                  active ? 'text-trs-gold' : 'text-[#8E8E93] hover:text-white'
                 }`}
               >
+                <Icon size={22} strokeWidth={active ? 2.5 : 1.75} aria-hidden />
                 {label}
               </Link>
             </li>

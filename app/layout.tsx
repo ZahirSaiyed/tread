@@ -29,8 +29,8 @@ export const metadata: Metadata = {
 export const viewport: Viewport = {
   width: 'device-width',
   initialScale: 1,
-  maximumScale: 1,
-  userScalable: false,
+  // Do not set maximumScale or userScalable — disabling zoom is a WCAG 1.4.4 violation
+  // and is ignored by modern browsers anyway.
 }
 
 export default function RootLayout({
@@ -46,7 +46,10 @@ export default function RootLayout({
       <body className="font-sans antialiased bg-[#000000] text-white">
         {children}
         <Toaster
-          position="top-center"
+          position="bottom-center"
+          containerStyle={{
+            bottom: 'max(5.5rem, calc(4.5rem + env(safe-area-inset-bottom, 0px)))',
+          }}
           toastOptions={{
             style: {
               background: '#1C1C1E',

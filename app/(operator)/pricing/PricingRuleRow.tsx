@@ -100,10 +100,8 @@ export function PricingRuleRow({ rule }: Props) {
       <div className="pr-2">
         <input
           name="tax_rate"
-          type="number"
-          step="0.001"
-          min="0"
-          max="1"
+          type="text"
+          inputMode="decimal"
           defaultValue={rule.tax_rate}
           className={inputClass}
         />
@@ -143,9 +141,8 @@ function CentsInput({ name, defaultCents }: { name: string; defaultCents: number
     <div className="relative">
       <span className="absolute left-2 top-1/2 -translate-y-1/2 text-[#8E8E93] text-sm">$</span>
       <input
-        type="number"
-        min="0"
-        step="0.01"
+        type="text"
+        inputMode="decimal"
         value={dollars}
         onChange={(e) => setDollars(e.target.value)}
         className="w-full bg-[#1C1C1E] text-white rounded-lg pl-5 pr-2 py-1.5 text-sm border border-[#48484A] focus:border-[#F5A623] focus:outline-none"

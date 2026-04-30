@@ -2,6 +2,7 @@
 
 import Link from 'next/link'
 import { useLayoutEffect, useState } from 'react'
+import { MapPin, Car, Clock } from 'lucide-react'
 import type { Job } from '@/types/domain'
 import type { JobStatus } from '@/types/enums'
 import { JOB_STATUS_LABELS, SERVICE_TYPE_LABELS } from '@/types/enums'
@@ -11,20 +12,19 @@ import {
   telUrl,
 } from '@/lib/tech/jobActions'
 
+// Each status gets its own color — no more collapsing 3 states into one blue.
 function statusAccent(status: JobStatus): { dot: string; border: string; labelClass: string } {
   switch (status) {
     case 'pending':
-      return { dot: 'bg-[#FF9F0A]', border: 'border-l-[#FF9F0A]', labelClass: 'text-[#FF9F0A]' }
+      return { dot: 'bg-[#636366]', border: 'border-l-[#636366]', labelClass: 'text-[#8E8E93]' }
     case 'assigned':
+      return { dot: 'bg-trs-gold', border: 'border-l-trs-gold', labelClass: 'text-trs-gold' }
     case 'en_route':
+      return { dot: 'bg-status-enroute', border: 'border-l-status-enroute', labelClass: 'text-status-enroute' }
     case 'on_site':
       return { dot: 'bg-status-onjob', border: 'border-l-status-onjob', labelClass: 'text-status-onjob' }
     case 'complete':
-      return {
-        dot: 'bg-status-complete',
-        border: 'border-l-status-complete',
-        labelClass: 'text-status-complete',
-      }
+      return { dot: 'bg-status-complete', border: 'border-l-status-complete', labelClass: 'text-status-complete' }
     case 'cancelled':
       return { dot: 'bg-[#48484A]', border: 'border-l-[#48484A]', labelClass: 'text-[#8E8E93]' }
     default:
@@ -54,8 +54,6 @@ export function JobCard({ job }: JobCardProps) {
   const { dot, border, labelClass } = statusAccent(job.status)
   const serviceLabel = SERVICE_TYPE_LABELS[job.service_type] ?? job.service_type
   const statusLabel = JOB_STATUS_LABELS[job.status]
-  const inProgress = job.status === 'assigned' || job.status === 'en_route' || job.status === 'on_site'
-  const statusHeading = inProgress ? 'IN PROGRESS' : statusLabel.toUpperCase()
   const vehicle = vehicleLine(job)
 
   const [mapsHref, setMapsHref] = useState(() => googleDirectionsUrl(job.address))
@@ -71,7 +69,9 @@ export function JobCard({ job }: JobCardProps) {
         <div className="flex items-start justify-between gap-2 mb-3">
           <div className="flex items-center gap-2 min-w-0">
             <span className={`h-2 w-2 shrink-0 rounded-full ${dot}`} aria-hidden />
-            <span className={`text-xs font-semibold tracking-wide ${labelClass}`}>{statusHeading}</span>
+            <span className={`text-xs font-semibold tracking-wide ${labelClass}`}>
+              {statusLabel.toUpperCase()}
+            </span>
           </div>
           <time className="text-xs text-[#8E8E93] shrink-0 font-mono tabular-nums" dateTime={job.created_at}>
             {formatShortDate(job.created_at)}
@@ -81,18 +81,18 @@ export function JobCard({ job }: JobCardProps) {
         <h2 className="font-display text-lg text-white font-semibold leading-tight">{job.customer_name}</h2>
         <p className="text-sm text-trs-gold mt-1">{serviceLabel}</p>
 
-        <p className="text-sm text-[#8E8E93] mt-3 flex gap-2">
-          <span aria-hidden>📍</span>
+        <p className="text-sm text-[#8E8E93] mt-3 flex items-start gap-2">
+          <MapPin size={14} className="mt-0.5 shrink-0 text-[#636366]" aria-hidden />
           <span className="break-words">{job.address}</span>
         </p>
         {vehicle ? (
-          <p className="text-sm text-[#8E8E93] mt-2 flex gap-2">
-            <span aria-hidden>🚗</span>
+          <p className="text-sm text-[#8E8E93] mt-2 flex items-center gap-2">
+            <Car size={14} className="shrink-0 text-[#636366]" aria-hidden />
             <span>{vehicle}</span>
           </p>
         ) : null}
-        <p className="text-sm text-[#8E8E93] mt-2 flex gap-2">
-          <span aria-hidden>⏰</span>
+        <p className="text-sm text-[#8E8E93] mt-2 flex items-center gap-2">
+          <Clock size={14} className="shrink-0 text-[#636366]" aria-hidden />
           <span className="font-mono tabular-nums">{formatTime(job.created_at)}</span>
         </p>
         <p className="text-xs text-trs-gold/80 mt-2 font-medium">View job details →</p>

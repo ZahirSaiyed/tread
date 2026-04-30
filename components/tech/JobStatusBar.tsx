@@ -6,7 +6,6 @@ import { JOB_STATUS_LABELS } from '@/types/enums'
 const FLOW: JobStatus[] = ['pending', 'assigned', 'en_route', 'on_site', 'complete']
 
 function stepIndex(status: JobStatus): number {
-  if (status === 'cancelled') return -1
   const i = FLOW.indexOf(status)
   return i === -1 ? 0 : i
 }
@@ -21,34 +20,29 @@ export function JobStatusBar({ status }: { status: JobStatus }) {
   }
 
   const current = stepIndex(status)
+  const total = FLOW.length
+  const label = JOB_STATUS_LABELS[status]
 
   return (
-    <div className="flex items-center gap-1 overflow-x-auto pb-1" aria-label="Job status progress">
-      {FLOW.map((s, i) => {
-        const done = i < current
-        const active = i === current
-        const label = JOB_STATUS_LABELS[s]
-        return (
-          <div key={s} className="flex items-center gap-1 shrink-0">
-            {i > 0 ? (
-              <span className={`text-xs px-0.5 ${done || active ? 'text-trs-gold' : 'text-[#48484A]'}`}>
-                ─
-              </span>
-            ) : null}
-            <span
-              className={`rounded-full px-2.5 py-1 text-xs font-medium whitespace-nowrap ${
-                done
-                  ? 'bg-trs-gold/20 text-trs-gold'
-                  : active
-                    ? 'bg-status-onjob/25 text-status-onjob ring-1 ring-status-onjob'
-                    : 'bg-trs-slate text-[#48484A]'
-              }`}
-            >
-              {label}
-            </span>
-          </div>
-        )
-      })}
+    <div aria-label={`Job status: ${label}, step ${current + 1} of ${total}`}>
+      {/* Segmented progress bar — no overflow, works on any screen width */}
+      <div className="flex gap-1 mb-2" role="presentation">
+        {FLOW.map((_, i) => (
+          <div
+            key={i}
+            className={`h-1 flex-1 rounded-full transition-colors duration-300 ${
+              i <= current ? 'bg-trs-gold' : 'bg-trs-slate'
+            }`}
+          />
+        ))}
+      </div>
+
+      <div className="flex items-center justify-between">
+        <p className="text-sm font-semibold text-white">{label}</p>
+        <p className="text-xs text-[#636366] font-mono tabular-nums">
+          {current + 1} / {total}
+        </p>
+      </div>
     </div>
   )
 }

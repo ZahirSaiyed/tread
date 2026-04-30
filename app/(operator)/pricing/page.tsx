@@ -28,7 +28,7 @@ export default async function PricingPage() {
   return (
     <main className="mx-auto max-w-5xl p-6 pb-[max(6rem,calc(4.5rem+env(safe-area-inset-bottom,0px)))]">
       <div className="mb-8">
-        <h1 className="text-white text-2xl font-bold font-['Syne',sans-serif]">Pricing</h1>
+        <h1 className="font-display text-2xl font-bold text-white">Pricing</h1>
         <p className="text-[#8E8E93] text-sm mt-1">
           Base service rates for TRS. Mobile fee is a flat dispatch charge per job.
           Tax defaults to Virginia 6%.
