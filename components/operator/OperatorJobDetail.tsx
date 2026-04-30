@@ -160,8 +160,14 @@ export function OperatorJobDetail({ jobId }: { jobId: string }) {
   if (loading) {
     return (
       <div className={`space-y-4 px-4 pt-4 ${PAD}`}>
-        <div className="h-8 w-40 animate-pulse rounded-lg bg-trs-slate" />
-        <div className="h-48 animate-pulse rounded-xl bg-trs-charcoal" />
+        <div className="h-4 w-16 animate-pulse rounded bg-trs-slate" />
+        <div className="space-y-2">
+          <div className="h-8 w-48 animate-pulse rounded-lg bg-trs-slate" />
+          <div className="h-4 w-32 animate-pulse rounded bg-trs-charcoal" />
+        </div>
+        <div className="h-44 animate-pulse rounded-2xl bg-trs-charcoal" />
+        <div className="h-32 animate-pulse rounded-2xl bg-trs-charcoal" />
+        <div className="h-48 animate-pulse rounded-2xl bg-trs-charcoal" />
       </div>
     )
   }
@@ -228,96 +234,111 @@ export function OperatorJobDetail({ jobId }: { jobId: string }) {
         <section className="rounded-2xl border border-trs-slate bg-trs-charcoal p-4">
           <h2 className="text-sm font-semibold text-white">Edit (before en route)</h2>
           <form onSubmit={(e) => void saveEdits(e)} className="mt-4 space-y-3">
-            <label className="block text-xs text-[#8E8E93]">
+            <label className="block text-sm text-[#AEAEB2]">
               Name
               <input
+                autoComplete="name"
+                autoCapitalize="words"
                 value={customer_name}
                 onChange={(e) => setCustomerName(e.target.value)}
-                className="mt-1 w-full rounded-xl border border-trs-slate bg-black/40 px-3 py-2 text-sm text-white"
+                className="mt-1.5 w-full rounded-xl border border-trs-slate bg-trs-charcoal px-3 py-3 text-base text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-trs-gold/70"
               />
             </label>
-            <label className="block text-xs text-[#8E8E93]">
+            <label className="block text-sm text-[#AEAEB2]">
               Phone
               <input
+                type="tel"
+                autoComplete="tel"
+                inputMode="tel"
                 value={customer_phone}
                 onChange={(e) => setCustomerPhone(e.target.value)}
-                className="mt-1 w-full rounded-xl border border-trs-slate bg-black/40 px-3 py-2 text-sm text-white"
+                className="mt-1.5 w-full rounded-xl border border-trs-slate bg-trs-charcoal px-3 py-3 text-base text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-trs-gold/70"
               />
             </label>
-            <label className="block text-xs text-[#8E8E93]">
+            <label className="block text-sm text-[#AEAEB2]">
               Address
-              <textarea
-                rows={2}
+              <input
+                type="text"
+                autoComplete="street-address"
                 value={address}
                 onChange={(e) => setAddress(e.target.value)}
-                className="mt-1 w-full rounded-xl border border-trs-slate bg-black/40 px-3 py-2 text-sm text-white"
+                className="mt-1.5 w-full rounded-xl border border-trs-slate bg-trs-charcoal px-3 py-3 text-base text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-trs-gold/70"
               />
             </label>
-            <div className="grid grid-cols-3 gap-2">
-              <label className="text-xs text-[#8E8E93]">
-                Year
-                <input
-                  value={vehicle_year}
-                  onChange={(e) => setVehicleYear(e.target.value)}
-                  className="mt-1 w-full rounded-xl border border-trs-slate bg-black/40 px-2 py-2 text-sm text-white"
-                />
-              </label>
-              <label className="col-span-2 text-xs text-[#8E8E93]">
-                Make
-                <input
-                  value={vehicle_make}
-                  onChange={(e) => setVehicleMake(e.target.value)}
-                  className="mt-1 w-full rounded-xl border border-trs-slate bg-black/40 px-2 py-2 text-sm text-white"
-                />
-              </label>
+            <div className="grid grid-cols-5 gap-2">
+              <div className="col-span-2">
+                <label className="block text-sm text-[#AEAEB2]">
+                  Year
+                  <input
+                    type="text"
+                    inputMode="numeric"
+                    maxLength={4}
+                    placeholder="2022"
+                    value={vehicle_year}
+                    onChange={(e) => setVehicleYear(e.target.value.replace(/\D/g, ''))}
+                    className="mt-1.5 w-full rounded-xl border border-trs-slate bg-trs-charcoal px-3 py-3 text-base text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-trs-gold/70"
+                  />
+                </label>
+              </div>
+              <div className="col-span-3">
+                <label className="block text-sm text-[#AEAEB2]">
+                  Make
+                  <input
+                    autoCapitalize="words"
+                    placeholder="Toyota"
+                    value={vehicle_make}
+                    onChange={(e) => setVehicleMake(e.target.value)}
+                    className="mt-1.5 w-full rounded-xl border border-trs-slate bg-trs-charcoal px-3 py-3 text-base text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-trs-gold/70"
+                  />
+                </label>
+              </div>
             </div>
-            <label className="block text-xs text-[#8E8E93]">
+            <label className="block text-sm text-[#AEAEB2]">
               Model
               <input
+                autoCapitalize="words"
+                placeholder="Camry"
                 value={vehicle_model}
                 onChange={(e) => setVehicleModel(e.target.value)}
-                className="mt-1 w-full rounded-xl border border-trs-slate bg-black/40 px-3 py-2 text-sm text-white"
+                className="mt-1.5 w-full rounded-xl border border-trs-slate bg-trs-charcoal px-3 py-3 text-base text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-trs-gold/70"
               />
             </label>
-            <label className="block text-xs text-[#8E8E93]">
+            <label className="block text-sm text-[#AEAEB2]">
               Service
               <select
                 value={service_type}
-                onChange={(e) =>
-                  setServiceType(e.target.value as (typeof SERVICE_TYPES)[number])
-                }
-                className="mt-1 w-full rounded-xl border border-trs-slate bg-black/40 px-3 py-2 text-sm text-white"
+                onChange={(e) => setServiceType(e.target.value as (typeof SERVICE_TYPES)[number])}
+                className="mt-1.5 w-full rounded-xl border border-trs-slate bg-trs-charcoal px-3 py-3 text-base text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-trs-gold/70"
               >
                 {SERVICE_TYPES.map((st) => (
-                  <option key={st} value={st}>
-                    {SERVICE_TYPE_LABELS[st]}
-                  </option>
+                  <option key={st} value={st}>{SERVICE_TYPE_LABELS[st]}</option>
                 ))}
               </select>
             </label>
-            <label className="block text-xs text-[#8E8E93]">
-              Price USD
+            <label className="block text-sm text-[#AEAEB2]">
+              Price (USD)
               <input
-                type="number"
-                step="0.01"
+                type="text"
+                inputMode="decimal"
+                placeholder="0.00"
                 value={price_dollars}
                 onChange={(e) => setPriceDollars(e.target.value)}
-                className="mt-1 w-full rounded-xl border border-trs-slate bg-black/40 px-3 py-2 text-sm text-white"
+                className="mt-1.5 w-full rounded-xl border border-trs-slate bg-trs-charcoal px-3 py-3 text-base text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-trs-gold/70"
               />
             </label>
-            <label className="block text-xs text-[#8E8E93]">
+            <label className="block text-sm text-[#AEAEB2]">
               Notes
               <textarea
                 rows={2}
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}
-                className="mt-1 w-full rounded-xl border border-trs-slate bg-black/40 px-3 py-2 text-sm text-white"
+                className="mt-1.5 w-full rounded-xl border border-trs-slate bg-trs-charcoal px-3 py-3 text-base text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-trs-gold/70"
               />
             </label>
             <button
               type="submit"
               disabled={editBusy}
-              className="w-full rounded-xl bg-trs-gold py-3 text-sm font-semibold text-black disabled:opacity-50"
+              className="w-full rounded-xl bg-trs-gold py-3.5 text-base font-semibold text-black transition-transform active:scale-[0.98] disabled:opacity-50"
             >
               {editBusy ? 'Saving…' : 'Save changes'}
             </button>

@@ -49,7 +49,7 @@ export default async function PricingPage() {
               </h2>
               <div className="bg-[#1C1C1E] rounded-2xl overflow-hidden">
                 {/* Table header */}
-                <div className="grid grid-cols-[1fr_1fr_1fr_1fr_1fr_1fr_48px] gap-0 px-4 py-2 border-b border-[#2C2C2E]">
+                <div className="hidden sm:grid grid-cols-[1fr_1fr_1fr_1fr_1fr_1fr_48px] gap-0 px-4 py-2 border-b border-[#2C2C2E]">
                   {['Vehicle Class', 'Location', 'Base (per unit)', 'Mobile Fee', 'Disposal', 'Tax', ''].map((h) => (
                     <span key={h} className="text-[#48484A] text-xs font-medium">{h}</span>
                   ))}

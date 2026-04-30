@@ -363,7 +363,7 @@ export function TechJobDetail({ jobId }: { jobId: string }) {
               onChange={(e) => setCancelReason(e.target.value)}
               rows={3}
               placeholder="Reason (required)"
-              className="mt-3 w-full rounded-xl border border-trs-slate bg-[#000000] px-3 py-2 text-sm text-white placeholder:text-[#48484A] focus:border-trs-gold focus:outline-none"
+              className="mt-3 w-full rounded-xl border border-trs-slate bg-black px-3 py-2 text-sm text-white placeholder:text-[#48484A] focus:border-trs-gold focus:outline-none"
             />
             <div className="mt-4 flex gap-2 justify-end">
               <button

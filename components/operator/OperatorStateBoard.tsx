@@ -220,12 +220,31 @@ export function OperatorStateBoard() {
 
   if (loading) {
     return (
-      <div className="flex min-h-0 flex-1 flex-col gap-4 p-4">
-        <div className="h-8 w-48 animate-pulse rounded-lg bg-trs-slate" />
-        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-          {[1, 2, 3].map((i) => (
-            <div key={i} className="h-40 animate-pulse rounded-2xl bg-trs-charcoal" />
-          ))}
+      <div className="flex min-h-0 flex-1 flex-col overflow-hidden pb-[max(7rem,calc(4.5rem+env(safe-area-inset-bottom,0px)))]">
+        {/* Header chrome skeleton */}
+        <div className="shrink-0 space-y-4 border-b border-white/[0.06] px-4 pb-4 pt-2">
+          <div className="h-8 w-40 animate-pulse rounded-lg bg-trs-slate" />
+          <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-6">
+            {[...Array(6)].map((_, i) => (
+              <div key={i} className="h-14 animate-pulse rounded-xl bg-trs-charcoal" />
+            ))}
+          </div>
+        </div>
+        {/* Body skeleton */}
+        <div className="min-h-0 flex-1 px-4 pt-4">
+          <div className="mx-auto flex max-w-7xl flex-col gap-8 lg:flex-row">
+            <div className="min-w-0 flex-1 space-y-3">
+              <div className="h-5 w-28 animate-pulse rounded bg-trs-slate" />
+              <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+                {[1, 2, 3].map((i) => (
+                  <div key={i} className="h-44 animate-pulse rounded-2xl bg-trs-charcoal" />
+                ))}
+              </div>
+            </div>
+            <div className="w-full shrink-0 lg:w-80">
+              <div className="h-64 animate-pulse rounded-2xl bg-trs-charcoal" />
+            </div>
+          </div>
         </div>
       </div>
     )

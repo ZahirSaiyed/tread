@@ -29,8 +29,6 @@ export const metadata: Metadata = {
 export const viewport: Viewport = {
   width: 'device-width',
   initialScale: 1,
-  // Do not set maximumScale or userScalable — disabling zoom is a WCAG 1.4.4 violation
-  // and is ignored by modern browsers anyway.
 }
 
 export default function RootLayout({
@@ -43,7 +41,7 @@ export default function RootLayout({
       lang="en"
       className={`dark ${syne.variable} ${dmSans.variable} ${jetbrainsMono.variable}`}
     >
-      <body className="font-sans antialiased bg-[#000000] text-white">
+      <body className="font-sans antialiased bg-black text-white">
         {children}
         <Toaster
           position="bottom-center"
