@@ -1,5 +1,6 @@
 import { getCurrentTenantBranding } from '@/lib/branding/server'
 import { TenantLogo } from '@/components/branding/TenantLogo'
+import { LogoutButton } from '@/components/auth/LogoutButton'
 
 type ShellVariant = 'tech' | 'operator'
 
@@ -28,6 +29,7 @@ export async function AppShellHeader({ variant }: { variant: ShellVariant }) {
             {SUBTITLE[variant]}
           </p>
         </div>
+        <LogoutButton />
       </div>
     </header>
   )
