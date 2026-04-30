@@ -3,10 +3,18 @@
 import Link from 'next/link'
 import { useCallback, useEffect, useState } from 'react'
 import toast from 'react-hot-toast'
+import { CheckCircle, Clock, MessageSquare } from 'lucide-react'
 import type { JobDetail } from '@/types/api'
 import type { JobEvent } from '@/types/domain'
 import type { JobStatus } from '@/types/enums'
 import { JOB_STATUS_LABELS, SERVICE_TYPE_LABELS } from '@/types/enums'
+import { createClient } from '@/lib/supabase/client'
+
+type ReviewRequestRow = {
+  id: string
+  sent_at: string
+  clicked_at: string | null
+}
 
 const SERVICE_TYPES = Object.keys(SERVICE_TYPE_LABELS) as (keyof typeof SERVICE_TYPE_LABELS)[]
 
@@ -44,6 +52,7 @@ export function OperatorJobDetail({ jobId }: { jobId: string }) {
   const [cancelReason, setCancelReason] = useState('')
   const [cancelBusy, setCancelBusy] = useState(false)
   const [editBusy, setEditBusy] = useState(false)
+  const [reviewRequest, setReviewRequest] = useState<ReviewRequestRow | null | undefined>(undefined)
   const [customer_name, setCustomerName] = useState('')
   const [customer_phone, setCustomerPhone] = useState('')
   const [address, setAddress] = useState('')
@@ -84,6 +93,16 @@ export function OperatorJobDetail({ jobId }: { jobId: string }) {
   useEffect(() => {
     void load()
   }, [load])
+
+  useEffect(() => {
+    const client = createClient()
+    void client
+      .from('review_requests')
+      .select('id, sent_at, clicked_at')
+      .eq('job_id', jobId)
+      .maybeSingle()
+      .then(({ data }) => setReviewRequest(data ?? null))
+  }, [jobId])
 
   const editable = detail?.status === 'pending' || detail?.status === 'assigned'
 
@@ -382,6 +401,42 @@ export function OperatorJobDetail({ jobId }: { jobId: string }) {
           ))}
         </ol>
       </section>
+
+      {/* Review request status — shown on completed jobs */}
+      {detail.status === 'complete' && reviewRequest !== undefined && (
+        <section className="rounded-2xl border border-trs-slate bg-trs-charcoal p-4">
+          <h2 className="flex items-center gap-2 text-sm font-semibold text-white">
+            <MessageSquare size={15} className="text-trs-gold" aria-hidden />
+            Review request
+          </h2>
+          {reviewRequest === null ? (
+            <p className="mt-3 text-sm text-[#8E8E93]">Not sent yet.</p>
+          ) : (
+            <dl className="mt-3 space-y-2 text-sm">
+              <div className="flex items-center gap-2">
+                <CheckCircle size={14} className="shrink-0 text-status-complete" aria-hidden />
+                <dt className="text-[#8E8E93]">Sent</dt>
+                <dd className="font-mono text-white">
+                  {new Date(reviewRequest.sent_at).toLocaleString()}
+                </dd>
+              </div>
+              <div className="flex items-center gap-2">
+                {reviewRequest.clicked_at ? (
+                  <CheckCircle size={14} className="shrink-0 text-trs-gold" aria-hidden />
+                ) : (
+                  <Clock size={14} className="shrink-0 text-[#636366]" aria-hidden />
+                )}
+                <dt className="text-[#8E8E93]">Clicked</dt>
+                <dd className={reviewRequest.clicked_at ? 'font-mono text-trs-gold' : 'text-[#636366]'}>
+                  {reviewRequest.clicked_at
+                    ? new Date(reviewRequest.clicked_at).toLocaleString()
+                    : 'Not yet'}
+                </dd>
+              </div>
+            </dl>
+          )}
+        </section>
+      )}
 
       {canCancel ? (
         <div className="pb-8">

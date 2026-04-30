@@ -26,6 +26,7 @@ export interface Tenant {
   after_hours_start: string // HH:MM format
   after_hours_end: string   // HH:MM format
   highway_minimum_fee_cents: number
+  google_review_url: string | null
   created_at: string
 }
 

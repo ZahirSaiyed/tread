@@ -4,6 +4,7 @@ import { getAuthUser } from '@/lib/auth/session'
 import { getJob, getJobPhotos, updateJobStatus } from '@/lib/db/jobs'
 import { hasCompletionPhotos } from '@/lib/tech/jobPhotos'
 import { UpdateJobStatusSchema, isValidTransition } from '@/lib/validators/job'
+import { sendReviewRequest } from '@/lib/reviews/reviewRequest'
 import type { ApiError } from '@/types/api'
 import type { Job } from '@/types/domain'
 import type { JobStatus } from '@/types/enums'
@@ -57,10 +58,7 @@ export async function PATCH(
       const photos = await getJobPhotos(supabase, id)
       if (!hasCompletionPhotos(photos)) {
         return NextResponse.json(
-          {
-            error:
-              'Upload before, during, and after photos before completing this job.',
-          },
+          { error: 'Upload before, during, and after photos before completing this job.' },
           { status: 422 },
         )
       }
@@ -74,6 +72,25 @@ export async function PATCH(
       cancellationReason: cancellation_reason,
       updatedBy: user.id,
     })
+
+    // Fire review request on completion — non-blocking, never fails the response
+    if (newStatus === 'complete') {
+      const { data: tenant } = await supabase
+        .from('tenants')
+        .select('twilio_number, google_review_url')
+        .eq('id', user.tenant_id)
+        .single()
+
+      void sendReviewRequest({
+        supabase,
+        job,
+        tenantTwilioNumber: tenant?.twilio_number ?? null,
+        googleReviewUrl: tenant?.google_review_url ?? process.env.GOOGLE_REVIEW_URL ?? null,
+        appUrl: process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000',
+      }).catch((err) => {
+        console.error('[status-route] review request failed silently:', err)
+      })
+    }
 
     return NextResponse.json(updated)
   } catch {

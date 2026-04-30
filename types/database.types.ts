@@ -511,6 +511,7 @@ export type Database = {
           after_hours_fee_cents: number
           after_hours_start: string
           created_at: string
+          google_review_url: string | null
           highway_minimum_fee_cents: number
           id: string
           logo_url: string | null
@@ -526,6 +527,7 @@ export type Database = {
           after_hours_fee_cents?: number
           after_hours_start?: string
           created_at?: string
+          google_review_url?: string | null
           highway_minimum_fee_cents?: number
           id?: string
           logo_url?: string | null
@@ -541,6 +543,7 @@ export type Database = {
           after_hours_fee_cents?: number
           after_hours_start?: string
           created_at?: string
+          google_review_url?: string | null
           highway_minimum_fee_cents?: number
           id?: string
           logo_url?: string | null
