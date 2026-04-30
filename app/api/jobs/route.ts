@@ -110,7 +110,8 @@ export async function POST(request: NextRequest): Promise<NextResponse<Job | Api
     .single()
 
   if (error) {
-    return NextResponse.json({ error: 'Failed to create job' }, { status: 500 })
+    console.error('[POST /api/jobs] insert error:', error)
+    return NextResponse.json({ error: error.message ?? 'Failed to create job' }, { status: 500 })
   }
 
   // Append creation event
