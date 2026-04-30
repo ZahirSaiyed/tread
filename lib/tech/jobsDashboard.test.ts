@@ -27,6 +27,8 @@ function makeJob(over: Partial<Job> = {}): Job {
     vehicle_model: 'Camry',
     service_type: 'tire_repair',
     service_variant: 'plug',
+    vehicle_class: 'standard',
+    location_type: 'suburban',
     status: 'assigned',
     assigned_tech_id: 'tech-1',
     price_cents: 15000,

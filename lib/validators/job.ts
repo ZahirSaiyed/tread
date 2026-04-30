@@ -33,6 +33,8 @@ export const CreateJobSchema = z.object({
     'brake_service',
   ]),
   service_variant: z.string().max(50).nullable().optional(),
+  vehicle_class: z.enum(['standard', 'suv', 'truck', 'lt', 'specialty']).nullable().optional(),
+  location_type: z.enum(['suburban', 'highway']).nullable().optional(),
   price_cents: z.number().int().min(0).nullable().optional(),
   notes: z.string().max(1000).nullable().optional(),
   source: z.enum(['sms', 'web', 'manual']).default('manual'),

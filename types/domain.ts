@@ -54,6 +54,8 @@ export interface Job {
   vehicle_model: string | null
   service_type: ServiceType
   service_variant: ServiceVariant | null
+  vehicle_class: VehicleClass | null
+  location_type: LocationType | null
   status: JobStatus
   assigned_tech_id: string | null
   price_cents: number | null

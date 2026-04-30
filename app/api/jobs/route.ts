@@ -97,6 +97,8 @@ export async function POST(request: NextRequest): Promise<NextResponse<Job | Api
       vehicle_model: input.vehicle_model ?? null,
       service_type: input.service_type,
       service_variant: input.service_variant ?? null,
+      vehicle_class: input.vehicle_class ?? null,
+      location_type: input.location_type ?? null,
       price_cents: input.price_cents ?? null,
       notes: input.notes ?? null,
       source: input.source,
