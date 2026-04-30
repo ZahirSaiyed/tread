@@ -1,5 +1,5 @@
 import type { SupabaseClient } from '@supabase/supabase-js'
-import type { Database } from '@/types/database.types'
+import type { Database, Json } from '@/types/database.types'
 import type { Job, JobEvent, JobPhoto } from '@/types/domain'
 import type { JobStatus, ServiceType } from '@/types/enums'
 
@@ -212,7 +212,7 @@ async function appendJobEvent(client: Client, opts: AppendEventOptions) {
     job_id: opts.jobId,
     tenant_id: opts.tenantId,
     event_type: opts.eventType,
-    payload: opts.payload,
+    payload: opts.payload as Json,
     created_by: opts.createdBy,
   })
   if (error) throw error
